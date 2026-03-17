@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExcelKit Pro · 7 Tools dalam 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+/* ─── DESIGN TOKENS ─────────────────────────────────────── */
+:root{
+  /* Warm cream palette */
+  --bg:       #f2ece0;
+  --bg2:      #ede5d5;
+  --paper:    #faf6ef;
+  --white:    #ffffff;
+  --ink:      #1c1208;
+  --ink2:     #3a2e1e;
+  --ink3:     #6b5a3e;
+  --muted:    #a0896a;
+  --border:   #ddd0b8;
+  --border2:  #c8b898;
+
+  /* Tool accent colors */
+  --c1: #2a6049;  --c1l: #e4f0eb;  /* Cleaner      – forest */
+  --c2: #b84f18;  --c2l: #faeee6;  /* Converter    – terracotta */
+  --c3: #7a3d92;  --c3l: #f3eaf8;  /* Splitter     – plum */
+  --c4: #b5830a;  --c4l: #fdf5e0;  /* Dedup        – amber */
+  --c5: #1a5f8a;  --c5l: #e4f0f8;  /* ColMapper    – navy */
+  --c6: #8b2252;  --c6l: #fae8f0;  /* Formula      – rose */
+  --c7: #2e6b5e;  --c7l: #e4f2ef;  /* Formatter    – teal */
+
+  --danger:#bf3030;
+  --sh:  0 1px 4px rgba(28,18,8,.07);
+  --sh2: 0 4px 18px rgba(28,18,8,.10);
+  --sh3: 0 12px 40px rgba(28,18,8,.13);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  display:flex;
+  overflow-x:hidden;
+}
+
+/* Paper grain overlay */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='.028'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+/* ─── SIDEBAR ────────────────────────────────────────────── */
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:var(--ink);
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+  z-index:100;
+}
+
+.sb-brand{
+  padding:28px 20px 24px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sb-wordmark{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:700;
+  color:#fff;letter-spacing:-.01em;line-height:1;
+  margin-bottom:4px;
+}
+.sb-wordmark em{font-style:italic;color:var(--c2);}
+.sb-tagline{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.35);
+}
+
+.sb-section-lbl{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.25);
+  padding:20px 20px 8px;
+}
+
+.sb-tools{flex:1;overflow-y:auto;padding:0 10px 10px;}
+.sb-tools::-webkit-scrollbar{width:3px;}
+.sb-tools::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
+
+.sbt{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  border:none;background:transparent;
+  font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;
+  color:rgba(255,255,255,.55);
+  cursor:pointer;width:100%;text-align:left;
+  transition:all .2s ease;margin-bottom:2px;
+  position:relative;
+}
+.sbt:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);}
+.sbt.active{background:rgba(255,255,255,.1);color:#fff;}
+.sbt-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  background:rgba(255,255,255,.2);transition:background .2s;
+}
+.sbt.active .sbt-dot,.sbt:hover .sbt-dot{background:currentColor;}
+
+/* Active color indicators */
+.sbt[data-tool="cleaner"].active  .sbt-dot{background:var(--c1);}
+.sbt[data-tool="converter"].active .sbt-dot{background:var(--c2);}
+.sbt[data-tool="splitter"].active .sbt-dot{background:var(--c3);}
+.sbt[data-tool="dedup"].active    .sbt-dot{background:var(--c4);}
+.sbt[data-tool="colmap"].active   .sbt-dot{background:var(--c5);}
+.sbt[data-tool="formula"].active  .sbt-dot{background:var(--c6);}
+.sbt[data-tool="formatter"].active .sbt-dot{background:var(--c7);}
+
+.sbt-num{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:rgba(255,255,255,.22);
+}
+
+.sb-footer{
+  padding:16px 20px;
+  border-top:1px solid rgba(255,255,255,.08);
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:rgba(255,255,255,.2);
+  letter-spacing:.08em;
+}
+
+/* ─── MAIN CONTENT ───────────────────────────────────────── */
+.main{
+  flex:1;min-height:100vh;
+  position:relative;z-index:1;
+  overflow-y:auto;
+}
+
+.panel{display:none;padding:40px 44px 80px;max-width:860px;}
+.panel.active{display:block;animation:panelIn .28s ease;}
+@keyframes panelIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+
+/* Panel header */
+.ph{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:36px;padding-bottom:28px;
+  border-bottom:1.5px solid var(--border);
+}
+.ph-left{}
+.ph-tag{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:.15em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:7px;
+  margin-bottom:10px;
+}
+.ph-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(28px,3.5vw,40px);font-weight:700;
+  line-height:1;letter-spacing:-.02em;
+}
+.ph-desc{font-size:13px;color:var(--ink3);line-height:1.7;max-width:480px;margin-top:8px;}
+.ph-badge{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:5px 14px;border-radius:100px;
+  border:1px solid currentColor;opacity:.7;
+  white-space:nowrap;margin-top:4px;
+}
+
+/* ─── CARD ───────────────────────────────────────────────── */
+.card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:16px;padding:22px 24px;margin-bottom:14px;
+  box-shadow:var(--sh);position:relative;overflow:hidden;
+}
+.card-bar{position:absolute;top:0;left:0;right:0;height:3px;}
+.clabel{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.clabel::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ─── UPLOAD ZONE ────────────────────────────────────────── */
+.uzone{
+  border:2px dashed var(--border2);border-radius:12px;
+  padding:40px 24px;text-align:center;cursor:pointer;
+  transition:all .25s ease;background:var(--bg);
+  position:relative;overflow:hidden;
+}
+.uzone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.uzone:hover,.uzone.drag{transform:translateY(-2px);box-shadow:var(--sh2);}
+
+.dz-ic{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px;transition:transform .25s;}
+.uzone:hover .dz-ic{transform:scale(1.1) rotate(-4deg);}
+.dz-t{font-weight:600;font-size:14px;color:var(--ink2);margin-bottom:4px;}
+.dz-s{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+/* ─── FILE BAR ───────────────────────────────────────────── */
+.fbar{display:none;align-items:center;gap:10px;border-radius:10px;padding:10px 14px;margin-top:12px;border:1.5px solid;}
+.fbar.on{display:flex;}
+.fbar-name{font-family:'JetBrains Mono',monospace;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fbar-size{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);flex-shrink:0;}
+.fbar-rm{width:22px;height:22px;background:rgba(191,48,48,.08);border:1px solid rgba(191,48,48,.2);border-radius:50%;color:var(--danger);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.fbar-rm:hover{background:rgba(191,48,48,.2);}
+
+/* file list */
+.flist{max-height:190px;overflow-y:auto;display:none;margin-top:12px;}
+.flist.on{display:block;}
+.fitem{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;margin-bottom:5px;background:var(--bg);border:1px solid var(--border);}
+.fitem-n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fitem-s{font-size:11px;color:var(--muted);flex-shrink:0;}
+.fitem-rm{background:rgba(191,48,48,.07);border:none;color:var(--danger);width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
+.fitem-rm:hover{background:rgba(191,48,48,.2);}
+
+/* ─── TOGGLES ────────────────────────────────────────────── */
+.orow{display:flex;flex-wrap:wrap;gap:16px;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;align-items:center;}
+.tgrp{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;}
+.tog{width:40px;height:22px;background:var(--border);border-radius:11px;position:relative;cursor:pointer;border:1.5px solid var(--border2);transition:all .22s;flex-shrink:0;}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--muted);border-radius:50%;transition:all .22s;box-shadow:0 1px 3px rgba(0,0,0,.13);}
+.tog.on{border-color:currentColor;}
+.tog.on::after{left:20px;background:white;}
+.tog-lbl{font-size:13px;font-weight:500;color:var(--ink2);}
+
+/* ─── CHECKBOXES ─────────────────────────────────────────── */
+.cbg{display:grid;gap:7px;}
+.cbi{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .18s;}
+.cbi:hover{border-color:var(--border2);}
+.cbi input{appearance:none;width:17px;height:17px;border-radius:5px;border:2px solid var(--border2);background:white;cursor:pointer;flex-shrink:0;transition:all .18s;position:relative;}
+.cbi input:checked{background:var(--c2);border-color:var(--c2);}
+.cbi input:checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;}
+.cbi-lbl{font-size:13px;color:var(--ink2);font-weight:500;}
+
+/* ─── INPUT ──────────────────────────────────────────────── */
+.irow{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.irow label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.sinput{flex:1;padding:10px 13px;background:var(--bg);border:1.5px solid var(--border2);border-radius:9px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:13px;transition:border-color .2s;outline:none;}
+.sinput:focus{background:white;}
+
+.stextarea{width:100%;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border2);border-radius:10px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;resize:vertical;outline:none;min-height:90px;transition:border-color .2s;line-height:1.6;}
+.stextarea:focus{background:white;}
+
+/* ─── MODE SWITCHER ──────────────────────────────────────── */
+.msw{display:inline-flex;background:var(--bg);border:1.5px solid var(--border2);border-radius:10px;padding:3px;gap:3px;margin-bottom:14px;}
+.mbtn{padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.05em;cursor:pointer;transition:all .18s;}
+.mbtn:hover{color:var(--ink);}
+.mbtn.on{background:white;color:var(--ink2);box-shadow:var(--sh);}
+
+/* ─── STATS ──────────────────────────────────────────────── */
+.srow{display:none;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;background:white;box-shadow:var(--sh);}
+.srow.on{display:grid;grid-template-columns:repeat(4,1fr);}
+.srow.three.on{grid-template-columns:repeat(3,1fr);}
+.sbox{padding:18px 12px;text-align:center;border-right:1px solid var(--border);}
+.sbox:last-child{border-right:none;}
+.snum{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:5px;}
+.slbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+
+/* ─── PROGRESS ───────────────────────────────────────────── */
+.pw{display:none;margin:12px 0;}
+.pw.on{display:block;}
+.ph2{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:7px;}
+.pt{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.pf{height:100%;width:0%;border-radius:2px;transition:width .35s ease;}
+.slim-p{display:none;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:14px;}
+.slim-p.on{display:block;}
+.slim-pf{height:100%;width:0%;border-radius:2px;transition:width .3s ease;}
+
+/* ─── STATUS ─────────────────────────────────────────────── */
+.stbar{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;font-size:12px;font-weight:500;background:var(--bg);border:1px solid var(--border);margin-top:12px;color:var(--ink2);}
+.stbar-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--muted);}
+.stbar.processing .stbar-dot{animation:blink 1s infinite;}
+.stbar.success .stbar-dot{background:var(--c1);}
+.stbar.error .stbar-dot{background:var(--danger);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── BUTTONS ────────────────────────────────────────────── */
+.btn{width:100%;padding:14px 22px;border:none;border-radius:11px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .22s ease;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:.01em;}
+.btn:hover:not(:disabled){transform:translateY(-1px);}
+.btn:disabled{background:var(--border)!important;color:var(--muted)!important;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+.brow{display:flex;flex-direction:column;gap:9px;}
+.bgh{background:white;color:var(--ink3);border:1.5px solid var(--border2);padding:12px 20px;font-size:12px;}
+.bgh:hover:not(:disabled){color:var(--ink);border-color:var(--border2);background:var(--bg);}
+
+/* ─── TABS ───────────────────────────────────────────────── */
+.tsw{display:flex;background:var(--bg);border:1.5px solid var(--border2);border-radius:12px;padding:3px;margin-bottom:14px;gap:3px;}
+.tbtn{flex:1;padding:10px 14px;border:none;border-radius:9px;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.tbtn:hover{color:var(--ink);}
+.tbtn.on{background:white;box-shadow:var(--sh);}
+.tpill{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:100px;letter-spacing:.08em;}
+.tbtn:not(.on) .tpill{background:var(--border);color:var(--muted);}
+.tpanel{display:none;}
+.tpanel.on{display:block;animation:panelIn .22s ease;}
+
+/* ─── TABLE PREVIEW ──────────────────────────────────────── */
+.prev{display:none;background:white;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:var(--sh);}
+.prev.on{display:block;}
+.prev-h{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--paper);}
+.prev-t{font-weight:700;font-size:13px;}
+.prev-b{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:100px;}
+.tw{overflow-x:auto;max-height:280px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{position:sticky;top:0;z-index:10;}
+th{background:var(--paper);padding:9px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;border-bottom:1.5px solid var(--border);}
+td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--ink2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg);}
+.rn{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;width:36px;}
+.more{padding:10px 18px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;border-top:1px solid var(--border);background:var(--paper);}
+
+/* ─── COL MAPPER ─────────────────────────────────────────── */
+.col-grid{display:grid;grid-template-columns:1fr 40px 1fr;gap:12px;align-items:center;margin-top:12px;}
+.col-list{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+.col-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;transition:all .15s;}
+.col-item.selected{border-color:currentColor;}
+.col-item input.ci{appearance:none;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border2);background:white;cursor:pointer;flex-shrink:0;position:relative;transition:all .15s;}
+.col-item input.ci:checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;}
+.col-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.col-rename{flex:1;padding:7px 10px;background:white;border:1.5px solid var(--border2);border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);outline:none;transition:border-color .2s;}
+.col-rename:focus{border-color:var(--c5);}
+.col-order-btn{background:white;border:1px solid var(--border2);border-radius:6px;padding:4px 7px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;width:100%;}
+.col-order-btn:hover{background:var(--bg2);color:var(--ink);}
+.arrow-col{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:18px;color:var(--muted);}
+
+/* ─── FORMULA RESULT ─────────────────────────────────────── */
+.formula-result{
+  background:var(--ink);color:#e8f5e9;
+  border-radius:12px;padding:18px 20px;margin-top:14px;
+  font-family:'JetBrains Mono',monospace;font-size:14px;
+  position:relative;display:none;
+  box-shadow:var(--sh3);
+}
+.formula-result.on{display:block;}
+.formula-copy{
+  position:absolute;top:12px;right:12px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.7);font-family:'JetBrains Mono',monospace;
+  font-size:10px;padding:5px 12px;border-radius:6px;cursor:pointer;
+  transition:all .15s;letter-spacing:.05em;
+}
+.formula-copy:hover{background:rgba(255,255,255,.18);color:white;}
+.formula-main{font-size:16px;color:#a5d6a7;margin-bottom:10px;word-break:break-all;}
+.formula-explain{font-size:12px;color:rgba(255,255,255,.55);line-height:1.7;}
+.formula-spinner{display:none;align-items:center;gap:10px;padding:16px 18px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-top:12px;font-size:13px;color:var(--muted);}
+.formula-spinner.on{display:flex;}
+.spin{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--c6);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── FORMATTER ──────────────────────────────────────────── */
+.fmt-rule{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;margin-bottom:7px;flex-wrap:wrap;}
+.fmt-select{padding:7px 10px;background:white;border:1.5px solid var(--border2);border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;color:var(--ink);cursor:pointer;outline:none;}
+.fmt-select:focus{border-color:var(--c7);}
+.fmt-tag{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--c7l);color:var(--c7);padding:3px 8px;border-radius:100px;border:1px solid rgba(46,107,94,.2);}
+.fmt-label{font-size:12px;color:var(--ink3);font-weight:500;}
+
+/* ─── COMPRESS TAG ───────────────────────────────────────── */
+.ctag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;margin-top:10px;}
+.ctag::before{content:'⚡';font-size:10px;}
+
+/* ─── DEDUP COL PICKER ───────────────────────────────────── */
+.colpick{max-height:170px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:5px;margin-top:10px;}
+.cpi{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);cursor:pointer;font-size:11px;color:var(--ink2);font-weight:500;transition:all .15s;}
+.cpi:hover{border-color:var(--border2);}
+.cpi input{appearance:none;width:14px;height:14px;border-radius:4px;border:1.5px solid var(--border2);background:white;cursor:pointer;flex-shrink:0;transition:all .15s;position:relative;}
+.cpi input:checked{background:var(--c4);border-color:var(--c4);}
+.cpi input:checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;font-size:8px;font-weight:700;}
+
+/* ─── TOAST ──────────────────────────────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--ink);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:white;transform:translateY(80px);opacity:0;transition:all .32s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:320px;box-shadow:var(--sh3);}
+.toast.on{transform:translateY(0);opacity:1;}
+
+/* ─── COLOR PER TOOL ─────────────────────────────────────── */
+/* Cleaner */
+#p-cleaner .ph-tag{color:var(--c1)}
+#p-cleaner .ph-badge{color:var(--c1)}
+#p-cleaner .card-bar{background:var(--c1)}
+#p-cleaner .uzone:hover,#p-cleaner .uzone.drag{border-color:var(--c1);background:var(--c1l);}
+#p-cleaner .dz-ic{background:var(--c1l);border:1.5px solid rgba(42,96,73,.2);}
+#p-cleaner .fbar{background:var(--c1l);border-color:rgba(42,96,73,.25);}
+#p-cleaner .fbar-name{color:var(--c1)}
+#p-cleaner .tog.on{background:var(--c1)}
+#p-cleaner .snum{color:var(--c1)}
+#p-cleaner .snum.danger{color:var(--danger)}
+#p-cleaner .snum.warm{color:var(--c2)}
+#p-cleaner .pf{background:var(--c1)}
+#p-cleaner .slim-pf{background:var(--c1)}
+#p-cleaner .btn-main{background:var(--c1);color:white;}
+#p-cleaner .btn-main:hover:not(:disabled){background:#1f4d38;box-shadow:0 6px 20px rgba(42,96,73,.3);}
+#p-cleaner .prev-b{background:var(--c1l);border:1px solid rgba(42,96,73,.2);color:var(--c1);}
+#p-cleaner .ctag{background:var(--c1l);border:1px solid rgba(42,96,73,.2);color:var(--c1);}
+/* Converter */
+#p-converter .ph-tag{color:var(--c2)}
+#p-converter .ph-badge{color:var(--c2)}
+#p-converter .card-bar{background:var(--c2)}
+#p-converter .uzone:hover,#p-converter .uzone.drag{border-color:var(--c2);background:var(--c2l);}
+#p-converter .dz-ic{background:var(--c2l);border:1.5px solid rgba(184,79,24,.2);}
+#p-converter .fbar{background:var(--c2l);border-color:rgba(184,79,24,.25);}
+#p-converter .fbar-name{color:var(--c2)}
+#p-converter .cbi input:checked{background:var(--c2);border-color:var(--c2);}
+#p-converter .pf{background:var(--c2)}
+#p-converter .btn-main{background:var(--c2);color:white;}
+#p-converter .btn-main:hover:not(:disabled){background:#8f3a0e;box-shadow:0 6px 20px rgba(184,79,24,.3);}
+#p-converter .ctag{background:var(--c2l);border:1px solid rgba(184,79,24,.2);color:var(--c2);}
+#p-converter .sinput:focus{border-color:var(--c2);}
+/* Splitter */
+#p-splitter .ph-tag{color:var(--c3)}
+#p-splitter .ph-badge{color:var(--c3)}
+#p-splitter .tbtn.nd.on{color:var(--c1);}
+#p-splitter .tbtn.nd.on .tpill{background:var(--c1l);color:var(--c1);}
+#p-splitter .tbtn.acc.on{color:var(--c3);}
+#p-splitter .tbtn.acc.on .tpill{background:var(--c3l);color:var(--c3);}
+.nd-card .card-bar{background:var(--c1)}.nd-card .uzone:hover,.nd-card .uzone.drag{border-color:var(--c1);background:var(--c1l);}.nd-card .dz-ic{background:var(--c1l);border:1.5px solid rgba(42,96,73,.2);}.nd-card .fbar{background:var(--c1l);border-color:rgba(42,96,73,.25);}.nd-card .fbar-name{color:var(--c1)}.nd-card .pf{background:var(--c1)}.nd-card .btn-main{background:var(--c1);color:white;}.nd-card .btn-main:hover:not(:disabled){background:#1f4d38;box-shadow:0 6px 20px rgba(42,96,73,.3);}
+.acc-card .card-bar{background:var(--c3)}.acc-card .uzone:hover,.acc-card .uzone.drag{border-color:var(--c3);background:var(--c3l);}.acc-card .dz-ic{background:var(--c3l);border:1.5px solid rgba(122,61,146,.2);}.acc-card .fbar{background:var(--c3l);border-color:rgba(122,61,146,.25);}.acc-card .fbar-name{color:var(--c3)}.acc-card .pf{background:var(--c3)}.acc-card .btn-main{background:var(--c3);color:white;}.acc-card .btn-main:hover:not(:disabled){background:#5e2e72;box-shadow:0 6px 20px rgba(122,61,146,.3);}
+/* Dedup */
+#p-dedup .ph-tag{color:var(--c4)}
+#p-dedup .ph-badge{color:var(--c4)}
+#p-dedup .card-bar{background:var(--c4)}
+#p-dedup .uzone:hover,#p-dedup .uzone.drag{border-color:var(--c4);background:var(--c4l);}
+#p-dedup .dz-ic{background:var(--c4l);border:1.5px solid rgba(181,131,10,.2);}
+#p-dedup .fbar{background:var(--c4l);border-color:rgba(181,131,10,.25);}
+#p-dedup .fbar-name{color:var(--c4)}
+#p-dedup .slim-pf{background:var(--c4)}
+#p-dedup .btn-main{background:var(--c4);color:white;}
+#p-dedup .btn-main:hover:not(:disabled){background:#8a6208;box-shadow:0 6px 20px rgba(181,131,10,.3);}
+#p-dedup .prev-b{background:var(--c4l);border:1px solid rgba(181,131,10,.2);color:var(--c4);}
+#p-dedup .cpi input:checked{background:var(--c4);border-color:var(--c4);}
+/* ColMapper */
+#p-colmap .ph-tag{color:var(--c5)}
+#p-colmap .ph-badge{color:var(--c5)}
+#p-colmap .card-bar{background:var(--c5)}
+#p-colmap .uzone:hover,#p-colmap .uzone.drag{border-color:var(--c5);background:var(--c5l);}
+#p-colmap .dz-ic{background:var(--c5l);border:1.5px solid rgba(26,95,138,.2);}
+#p-colmap .fbar{background:var(--c5l);border-color:rgba(26,95,138,.25);}
+#p-colmap .fbar-name{color:var(--c5)}
+#p-colmap .slim-pf{background:var(--c5)}
+#p-colmap .btn-main{background:var(--c5);color:white;}
+#p-colmap .btn-main:hover:not(:disabled){background:#124567;box-shadow:0 6px 20px rgba(26,95,138,.3);}
+/* Formula */
+#p-formula .ph-tag{color:var(--c6)}
+#p-formula .ph-badge{color:var(--c6)}
+#p-formula .card-bar{background:var(--c6)}
+#p-formula .stextarea:focus{border-color:var(--c6);}
+#p-formula .btn-main{background:var(--c6);color:white;}
+#p-formula .btn-main:hover:not(:disabled){background:#6a1a3e;box-shadow:0 6px 20px rgba(139,34,82,.3);}
+#p-formula .stbar-dot.on{background:var(--c6);}
+/* Formatter */
+#p-formatter .ph-tag{color:var(--c7)}
+#p-formatter .ph-badge{color:var(--c7)}
+#p-formatter .card-bar{background:var(--c7)}
+#p-formatter .uzone:hover,#p-formatter .uzone.drag{border-color:var(--c7);background:var(--c7l);}
+#p-formatter .dz-ic{background:var(--c7l);border:1.5px solid rgba(46,107,94,.2);}
+#p-formatter .fbar{background:var(--c7l);border-color:rgba(46,107,94,.25);}
+#p-formatter .fbar-name{color:var(--c7)}
+#p-formatter .slim-pf{background:var(--c7)}
+#p-formatter .btn-main{background:var(--c7);color:white;}
+#p-formatter .btn-main:hover:not(:disabled){background:#1e4d44;box-shadow:0 6px 20px rgba(46,107,94,.3);}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  body{flex-direction:column;}
+  .sidebar{width:100%;height:auto;min-height:unset;position:relative;flex-direction:row;flex-wrap:wrap;}
+  .sb-brand{border-bottom:none;border-right:1px solid rgba(255,255,255,.08);padding:16px;}
+  .sb-section-lbl{display:none;}
+  .sb-tools{display:flex;flex-wrap:wrap;padding:8px;flex:1;}
+  .sbt{min-width:unset;font-size:11px;padding:7px 10px;}
+  .sb-footer{display:none;}
+  .panel{padding:24px 18px 60px;}
+  .srow.on{grid-template-columns:repeat(2,1fr);}
+  .sbox:nth-child(2){border-right:none;}
+  .sbox:nth-child(3),.sbox:nth-child(4){border-top:1px solid var(--border);}
+}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ SIDEBAR ═══════ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-wordmark">Excel<em>Kit</em></div>
+    <div class="sb-tagline">7 Tools · All-in-One</div>
+  </div>
+
+  <div class="sb-section-lbl">Tools</div>
+  <div class="sb-tools">
+    <button class="sbt active" data-tool="cleaner"   onclick="nav('cleaner',this)">  <span class="sbt-dot"></span>🧹 Excel Cleaner    <span class="sbt-num">01</span></button>
+    <button class="sbt"        data-tool="converter" onclick="nav('converter',this)"><span class="sbt-dot"></span>🔄 Convert & Merger <span class="sbt-num">02</span></button>
+    <button class="sbt"        data-tool="splitter"  onclick="nav('splitter',this)"> <span class="sbt-dot"></span>✂️ Splitter BB      <span class="sbt-num">03</span></button>
+    <button class="sbt"        data-tool="dedup"     onclick="nav('dedup',this)">    <span class="sbt-dot"></span>🔍 Duplikat Remover <span class="sbt-num">04</span></button>
+    <button class="sbt"        data-tool="colmap"    onclick="nav('colmap',this)">   <span class="sbt-dot"></span>🗂️ Column Mapper    <span class="sbt-num">05</span></button>
+    <button class="sbt"        data-tool="formula"   onclick="nav('formula',this)">  <span class="sbt-dot"></span>✨ Formula AI       <span class="sbt-num">06</span></button>
+    <button class="sbt"        data-tool="formatter" onclick="nav('formatter',this)"><span class="sbt-dot"></span>🎨 Data Formatter   <span class="sbt-num">07</span></button>
+  </div>
+
+  <div class="sb-footer">ExcelKit Pro · v2.0</div>
+</aside>
+
+<!-- ═══════════════════════════════════════ MAIN ═════════ -->
+<main class="main">
+
+<!-- ──────────────── 01 CLEANER ──────────────── -->
+<div class="panel active" id="p-cleaner">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 01 · Cleaner</div>
+      <div class="ph-title">Hapus Baris Kosong</div>
+      <div class="ph-desc">Upload file Excel atau CSV, hapus baris kosong secara otomatis. Hasil dikompresi sebelum download.</div>
+    </div>
+    <div class="ph-badge">XLSX · XLS · CSV</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="clabel">Upload File</div>
+    <div class="uzone" id="cl-z"><input type="file" id="cl-i" accept=".xlsx,.xls,.csv"><div class="dz-ic">📂</div><div class="dz-t">Drag & drop atau klik untuk pilih</div><div class="dz-s">Support: .xlsx · .xls · .csv</div></div>
+    <div class="fbar" id="cl-b"><span>📄</span><span class="fbar-name" id="cl-fn"></span><span class="fbar-size" id="cl-fs"></span><button class="fbar-rm" id="cl-rm">✕</button></div>
+  </div>
+
+  <div class="orow">
+    <div class="tgrp" id="cl-tac"><div class="tog on" id="cl-tac-e" style="color:var(--c1)"></div><span class="tog-lbl">Hapus jika <strong>semua</strong> kolom kosong</span></div>
+    <div class="tgrp" id="cl-ttr"><div class="tog" id="cl-ttr-e" style="color:var(--c1)"></div><span class="tog-lbl">Trim spasi pada teks</span></div>
+  </div>
+
+  <div class="slim-p" id="cl-p"><div class="slim-pf" id="cl-pf"></div></div>
+
+  <div class="srow" id="cl-st">
+    <div class="sbox"><div class="snum" id="cl-s1">—</div><div class="slbl">Total Baris</div></div>
+    <div class="sbox"><div class="snum danger" id="cl-s2" style="color:var(--danger)">—</div><div class="slbl">Dihapus</div></div>
+    <div class="sbox"><div class="snum warm" id="cl-s3" style="color:var(--c2)">—</div><div class="slbl">Baris Bersih</div></div>
+    <div class="sbox"><div class="snum" id="cl-s4">—</div><div class="slbl">Kolom</div></div>
+  </div>
+
+  <div id="cl-act" style="display:none;" class="brow">
+    <button class="btn btn-main" id="cl-dl">⬇&ensp;Download Excel Bersih (Terkompresi)</button>
+    <button class="btn bgh" id="cl-res">↺&ensp;Upload file lain</button>
+  </div>
+  <div class="ctag" id="cl-ct" style="display:none;">Output terkompresi otomatis — ukuran file lebih kecil.</div>
+
+  <div class="prev" id="cl-pv">
+    <div class="prev-h"><div class="prev-t">Preview Data Bersih</div><div class="prev-b" id="cl-pb">— baris</div></div>
+    <div class="tw"><table id="cl-pt"></table></div>
+    <div class="more" id="cl-mr" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ──────────────── 02 CONVERTER ──────────────── -->
+<div class="panel" id="p-converter">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 02 · Converter</div>
+      <div class="ph-title">Convert & Merger</div>
+      <div class="ph-desc">Convert XLSX ↔ CSV, atau gabung banyak file sekaligus. Semua output XLSX dikompresi otomatis.</div>
+    </div>
+    <div class="ph-badge">MULTI-FILE</div>
+  </div>
+
+  <div class="msw"><button class="mbtn on" id="cv-fm" onclick="cvM('file')">📄 Files</button><button class="mbtn" id="cv-flm" onclick="cvM('folder')">📁 Folder</button></div>
+
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="clabel">Upload File</div>
+    <div class="uzone" id="cv-z">
+      <input type="file" id="cv-i" multiple accept=".xlsx,.csv">
+      <input type="file" id="cv-fi" webkitdirectory directory multiple style="display:none;">
+      <div class="dz-ic" id="cv-di">📄</div><div class="dz-t" id="cv-dt">Drag & drop atau klik untuk upload</div><div class="dz-s" id="cv-ds">Support: .xlsx · .csv</div>
+    </div>
+    <div id="cv-foli" style="display:none;margin-top:12px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;" id="cv-foln"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div style="background:white;border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--c2);" id="cv-n1">0</div><div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;">Files</div></div>
+        <div style="background:white;border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--c1);" id="cv-n2">0</div><div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;">XLSX</div></div>
+        <div style="background:white;border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--c4);" id="cv-n3">0</div><div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;">CSV</div></div>
+        <div style="background:white;border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--muted);" id="cv-n4">0 KB</div><div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;">Total</div></div>
+      </div>
+    </div>
+    <div class="flist" id="cv-fl"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="clabel">Konfigurasi Output</div>
+    <div class="irow"><label>Nama Output</label><input type="text" id="cv-on" class="sinput" value="combined_file"></div>
+    <div class="cbg">
+      <label class="cbi"><input type="checkbox" id="cv-o1"><span class="cbi-lbl">📤 Convert .xlsx → .csv</span></label>
+      <label class="cbi"><input type="checkbox" id="cv-o2"><span class="cbi-lbl">📥 Convert .csv → .xlsx (terkompresi)</span></label>
+      <label class="cbi"><input type="checkbox" id="cv-o3"><span class="cbi-lbl">🔗 Gabung semua .xlsx → 1 file (terkompresi)</span></label>
+      <label class="cbi"><input type="checkbox" id="cv-o4"><span class="cbi-lbl">🔗 Gabung semua .csv → .csv + .xlsx</span></label>
+    </div>
+    <div class="ctag">Semua output XLSX dikompresi otomatis untuk ukuran lebih kecil.</div>
+    <div class="pw" id="cv-pw"><div class="ph2"><span id="cv-pl">Memproses...</span><span id="cv-pp">0%</span></div><div class="pt"><div class="pf" id="cv-pf"></div></div></div>
+    <div style="margin-top:14px;"><button class="btn btn-main" id="cv-btn" disabled onclick="cvProc()">⚡&ensp;Proses & Download</button></div>
+    <div class="stbar" id="cv-st"><div class="stbar-dot"></div><span id="cv-stx">Upload file dulu untuk mulai</span></div>
+  </div>
+</div>
+
+<!-- ──────────────── 03 SPLITTER ──────────────── -->
+<div class="panel" id="p-splitter">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 03 · Splitter</div>
+      <div class="ph-title">Pecah Buku Besar</div>
+      <div class="ph-desc">Split file buku besar per nomor akun — download sebagai ZIP berisi banyak file Excel terkompresi.</div>
+    </div>
+    <div class="ph-badge">ZIP OUTPUT</div>
+  </div>
+
+  <div class="tsw">
+    <button class="tbtn nd on" onclick="spT('nd')">📋 Format ND <span class="tpill">ACCURATE-ND</span></button>
+    <button class="tbtn acc" onclick="spT('acc')">🧮 Format Accurate <span class="tpill">ACCURATE</span></button>
+  </div>
+
+  <div class="tpanel on" id="tp-nd">
+    <div class="card nd-card">
+      <div class="card-bar"></div><div class="clabel">01 / Upload File ND</div>
+      <div class="uzone" id="nd-z"><input type="file" id="nd-i" accept=".xlsx,.xls"><div class="dz-ic">📂</div><div class="dz-t">Drag & drop atau klik untuk pilih</div><div class="dz-s">Format .xlsx / .xls · Kolom: Nomor Perkiraan, Nama Perkiraan, dst.</div></div>
+      <div class="fbar nd-card" id="nd-b"><span>📄</span><span class="fbar-name" id="nd-fn"></span><span class="fbar-size" id="nd-fs"></span><button class="fbar-rm" id="nd-rm">✕</button></div>
+    </div>
+    <div class="card nd-card">
+      <div class="card-bar"></div><div class="clabel">02 / Aksi</div>
+      <div class="brow">
+        <button class="btn btn-main" id="nd-sb" disabled>⚡&ensp;Split & Download ZIP</button>
+        <button class="btn bgh" id="nd-tb">⬇&ensp;Download Template ND</button>
+      </div>
+      <div class="pw nd-card" id="nd-pw"><div class="ph2"><span id="nd-pl">Memproses...</span><span id="nd-pp">0%</span></div><div class="pt"><div class="pf" id="nd-pf"></div></div></div>
+      <div class="stbar" id="nd-st"><div class="stbar-dot"></div><span id="nd-stx">Belum ada file dipilih</span></div>
+    </div>
+  </div>
+
+  <div class="tpanel" id="tp-acc">
+    <div class="card acc-card">
+      <div class="card-bar"></div><div class="clabel">01 / Upload File Accurate</div>
+      <div class="uzone" id="acc-z"><input type="file" id="acc-i" accept=".xlsx,.xls,.csv"><div class="dz-ic">📂</div><div class="dz-t">Drag & drop atau klik untuk pilih</div><div class="dz-s">Format .xlsx / .xls / .csv · Kolom: No Akun, Nama Akun, dst.</div></div>
+      <div class="fbar acc-card" id="acc-b"><span>📄</span><span class="fbar-name" id="acc-fn"></span><span class="fbar-size" id="acc-fs"></span><button class="fbar-rm" id="acc-rm">✕</button></div>
+    </div>
+    <div class="card acc-card">
+      <div class="card-bar"></div><div class="clabel">02 / Aksi</div>
+      <div class="brow">
+        <button class="btn btn-main" id="acc-sb" disabled>⚡&ensp;Split & Download ZIP</button>
+        <button class="btn bgh" id="acc-tb">⬇&ensp;Download Template Accurate</button>
+      </div>
+      <div class="pw acc-card" id="acc-pw"><div class="ph2"><span id="acc-pl">Memproses...</span><span id="acc-pp">0%</span></div><div class="pt"><div class="pf" id="acc-pf"></div></div></div>
+      <div class="stbar" id="acc-st"><div class="stbar-dot"></div><span id="acc-stx">Belum ada file dipilih</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────── 04 DEDUP ──────────────── -->
+<div class="panel" id="p-dedup">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 04 · Deduplicator</div>
+      <div class="ph-title">Hapus Data Duplikat</div>
+      <div class="ph-desc">Pilih kolom acuan pengecekan — baris dianggap duplikat jika nilai kolom yang dipilih sama persis.</div>
+    </div>
+    <div class="ph-badge">XLSX · XLS · CSV</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar"></div><div class="clabel">Upload File</div>
+    <div class="uzone" id="dd-z"><input type="file" id="dd-i" accept=".xlsx,.xls,.csv"><div class="dz-ic">🔍</div><div class="dz-t">Drag & drop atau klik untuk pilih</div><div class="dz-s">Support: .xlsx · .xls · .csv</div></div>
+    <div class="fbar" id="dd-b"><span>📄</span><span class="fbar-name" id="dd-fn"></span><span class="fbar-size" id="dd-fs"></span><button class="fbar-rm" id="dd-rm">✕</button></div>
+  </div>
+
+  <div class="card" id="dd-cc" style="display:none;">
+    <div class="card-bar"></div><div class="clabel">Pilih Kolom Acuan Duplikat</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Centang kolom yang dijadikan acuan untuk pengecekan baris duplikat.</div>
+    <div class="colpick" id="dd-cols"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn bgh" style="flex:1;padding:9px;" onclick="ddAll(true)">Pilih Semua</button>
+      <button class="btn bgh" style="flex:1;padding:9px;" onclick="ddAll(false)">Hapus Pilihan</button>
+    </div>
+  </div>
+
+  <div class="srow three" id="dd-st">
+    <div class="sbox"><div class="snum" style="color:var(--c1)" id="dd-n1">—</div><div class="slbl">Total Baris</div></div>
+    <div class="sbox"><div class="snum" style="color:var(--danger)" id="dd-n2">—</div><div class="slbl">Duplikat</div></div>
+    <div class="sbox"><div class="snum" style="color:var(--c4)" id="dd-n3">—</div><div class="slbl">Unik</div></div>
+  </div>
+
+  <div class="slim-p" id="dd-p"><div class="slim-pf" id="dd-pf"></div></div>
+
+  <div id="dd-act" style="display:none;" class="brow">
+    <button class="btn btn-main" id="dd-dl">⬇&ensp;Download Tanpa Duplikat (Terkompresi)</button>
+    <button class="btn bgh" id="dd-res">↺&ensp;Upload file lain</button>
+  </div>
+
+  <div class="prev" id="dd-pv">
+    <div class="prev-h"><div class="prev-t">Preview Data Unik</div><div class="prev-b" id="dd-pb">— baris</div></div>
+    <div class="tw"><table id="dd-pt"></table></div>
+    <div class="more" id="dd-mr" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ──────────────── 05 COLUMN MAPPER ──────────────── -->
+<div class="panel" id="p-colmap">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 05 · Column Mapper</div>
+      <div class="ph-title">Atur & Rename Kolom</div>
+      <div class="ph-desc">Upload file, centang kolom yang mau disertakan, ubah urutannya, dan rename — lalu download hasilnya.</div>
+    </div>
+    <div class="ph-badge">XLSX · XLS · CSV</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar"></div><div class="clabel">Upload File</div>
+    <div class="uzone" id="cm-z"><input type="file" id="cm-i" accept=".xlsx,.xls,.csv"><div class="dz-ic">🗂️</div><div class="dz-t">Drag & drop atau klik untuk pilih</div><div class="dz-s">Support: .xlsx · .xls · .csv</div></div>
+    <div class="fbar" id="cm-b"><span>📄</span><span class="fbar-name" id="cm-fn"></span><span class="fbar-size" id="cm-fs"></span><button class="fbar-rm" id="cm-rm">✕</button></div>
+  </div>
+
+  <div class="card" id="cm-editor" style="display:none;">
+    <div class="card-bar"></div><div class="clabel">Edit Kolom</div>
+    <div style="display:grid;grid-template-columns:1fr 36px 1fr;gap:10px;align-items:center;margin-bottom:8px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Kolom Asli</div>
+      <div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Nama Baru</div>
+    </div>
+    <div id="cm-rows"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn bgh" style="flex:1;padding:9px;" onclick="cmSelectAll(true)">✓ Pilih Semua</button>
+      <button class="btn bgh" style="flex:1;padding:9px;" onclick="cmSelectAll(false)">✗ Hapus Pilihan</button>
+    </div>
+  </div>
+
+  <div class="slim-p" id="cm-p"><div class="slim-pf" id="cm-pf"></div></div>
+
+  <div id="cm-act" style="display:none;" class="brow">
+    <button class="btn btn-main" id="cm-dl">⬇&ensp;Download dengan Kolom yang Dipilih</button>
+    <button class="btn bgh" id="cm-res">↺&ensp;Upload file lain</button>
+  </div>
+</div>
+
+<!-- ──────────────── 06 FORMULA AI ──────────────── -->
+<div class="panel" id="p-formula">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 06 · Formula AI</div>
+      <div class="ph-title">Excel Formula Generator</div>
+      <div class="ph-desc">Deskripsikan apa yang lo mau lakukan dalam bahasa Indonesia — AI akan buatkan rumus Excel yang tepat beserta penjelasannya.</div>
+    </div>
+    <div class="ph-badge">AI POWERED</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar"></div><div class="clabel">Deskripsikan Kebutuhan</div>
+    <div style="margin-bottom:10px;">
+      <textarea class="stextarea" id="fm-input" placeholder="Contoh: Hitung total penjualan di kolom C yang datanya lebih dari 100 ribu&#10;&#10;Atau: Cari nama di sheet2 kolom A berdasarkan ID di kolom B sheet1&#10;&#10;Atau: Buat rumus untuk menghitung umur dalam tahun dari tanggal lahir di A1"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Contoh cepat</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="fm-chips"></div>
+    </div>
+    <button class="btn btn-main" id="fm-btn" onclick="fmGenerate()">✨&ensp;Generate Formula</button>
+    <div class="formula-spinner" id="fm-spin"><div class="spin"></div><span>AI sedang menyusun rumus...</span></div>
+  </div>
+
+  <div class="formula-result" id="fm-result">
+    <button class="formula-copy" id="fm-copy" onclick="fmCopy()">Copy</button>
+    <div class="formula-main" id="fm-formula"></div>
+    <div class="formula-explain" id="fm-explain"></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-bar"></div><div class="clabel">Riwayat Formula</div>
+    <div id="fm-history" style="display:flex;flex-direction:column;gap:8px;min-height:40px;">
+      <div style="font-size:12px;color:var(--muted);padding:8px 0;">Belum ada riwayat — generate formula pertama lo!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────── 07 FORMATTER ──────────────── -->
+<div class="panel" id="p-formatter">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 07 · Data Formatter</div>
+      <div class="ph-title">Format Data Massal</div>
+      <div class="ph-desc">Upload file, pilih kolom dan jenis format yang mau diterapkan, download hasilnya. Format angka, tanggal, dan teks sekaligus.</div>
+    </div>
+    <div class="ph-badge">XLSX · XLS · CSV</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar"></div><div class="clabel">Upload File</div>
+    <div class="uzone" id="ft-z"><input type="file" id="ft-i" accept=".xlsx,.xls,.csv"><div class="dz-ic">🎨</div><div class="dz-t">Drag & drop atau klik untuk pilih</div><div class="dz-s">Support: .xlsx · .xls · .csv</div></div>
+    <div class="fbar" id="ft-b"><span>📄</span><span class="fbar-name" id="ft-fn"></span><span class="fbar-size" id="ft-fs"></span><button class="fbar-rm" id="ft-rm">✕</button></div>
+  </div>
+
+  <div class="card" id="ft-editor" style="display:none;">
+    <div class="card-bar"></div><div class="clabel">Aturan Format</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Setiap baris = 1 aturan format. Pilih kolom dan jenis transformasi yang mau diterapkan.</div>
+    <div id="ft-rules"></div>
+    <button class="btn bgh" style="margin-top:10px;padding:10px;" onclick="ftAddRule()">+ Tambah Aturan</button>
+  </div>
+
+  <div class="slim-p" id="ft-p"><div class="slim-pf" id="ft-pf"></div></div>
+
+  <div id="ft-act" style="display:none;" class="brow">
+    <button class="btn btn-main" id="ft-dl">⬇&ensp;Download Data Terformat (Terkompresi)</button>
+    <button class="btn bgh" id="ft-res">↺&ensp;Upload file lain</button>
+  </div>
+
+  <div class="prev" id="ft-pv">
+    <div class="prev-h"><div class="prev-t">Preview Data Terformat</div><div class="prev-b" id="ft-pb" style="background:var(--c7l);border:1px solid rgba(46,107,94,.2);color:var(--c7);">— baris</div></div>
+    <div class="tw"><table id="ft-pt"></table></div>
+    <div class="more" id="ft-mr" style="display:none;"></div>
+  </div>
+</div>
+
+</main><!-- /main -->
+
+<div class="toast" id="toast"><span id="ti">✓</span><span id="tm"></span></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   GLOBALS & HELPERS
+══════════════════════════════════════════════════════════ */
+let _tt;
+const $ = id => document.getElementById(id);
+function toast(icon, msg) {
+  $('ti').textContent = icon; $('tm').textContent = msg;
+  const el = $('toast'); el.classList.add('on');
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('on'), 3500);
+}
+function fmts(b) {
+  if (!b) return '0 B';
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function dlBlob(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = name; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(a.href);
+}
+function xbuf(wb) { return XLSX.write(wb, { bookType:'xlsx', type:'array', compression:true }); }
+function xblob(wb) { return new Blob([xbuf(wb)], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); }
+function rdBuf(f) { return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=e=>rej(e); r.readAsArrayBuffer(f); }); }
+function rdBin(f) { return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=e=>rej(e); r.readAsBinaryString(f); }); }
+
+function renderPrev(tid, bid, mid, sid, header, rows, badgeCls) {
+  const L=50, MC=9, dc=Math.min(header.length, MC), dr=rows.slice(0, L);
+  let h='<thead><tr><th>#</th>';
+  for (let i=0;i<dc;i++) h+=`<th>${esc(String(header[i]||'Col '+(i+1)))}</th>`;
+  if (header.length>MC) h+=`<th>+${header.length-MC}</th>`;
+  h+='</tr></thead><tbody>';
+  dr.forEach((row,i) => {
+    h+=`<tr><td class="rn">${i+1}</td>`;
+    for (let j=0;j<dc;j++) { const v=row[j]!==undefined?String(row[j]):''; h+=`<td title="${esc(v)}">${esc(v)||'<span style="color:var(--muted)">—</span>'}</td>`; }
+    if (header.length>MC) h+='<td style="color:var(--muted)">…</td>';
+    h+='</tr>';
+  });
+  $(tid).innerHTML = h+'</tbody>';
+  $(bid).textContent = `${rows.length.toLocaleString('id')} baris`;
+  $(sid).classList.add('on');
+  const mr = $(mid);
+  if (rows.length>L) { mr.style.display=''; mr.textContent=`... dan ${(rows.length-L).toLocaleString('id')} baris lainnya`; }
+  else mr.style.display='none';
+}
+
+function setupDZ(zid, iid, onf, onerr) {
+  const dz=$( zid), inp=$(iid);
+  inp.addEventListener('change', e => { if(e.target.files[0]) onf(e.target.files[0]); });
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); const f=e.dataTransfer.files[0]; (f&&/\.(xlsx|xls|csv)$/i.test(f.name))?onf(f):onerr&&onerr('Hanya .xlsx/.xls/.csv yang didukung'); });
+}
+
+/* Sidebar nav */
+function nav(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sbt').forEach(b=>b.classList.remove('active'));
+  $('p-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════════
+   01 · CLEANER
+══════════════════════════════════════════════════════════ */
+(function(){
+  let wb=null, cleaned=null, orig='', ac=true, tr=false;
+  setupDZ('cl-z','cl-i', f=>load(f));
+  $('cl-tac').addEventListener('click', ()=>{ ac=!ac; $('cl-tac-e').classList.toggle('on',ac); if(wb)proc(); });
+  $('cl-ttr').addEventListener('click', ()=>{ tr=!tr; $('cl-ttr-e').classList.toggle('on',tr); if(wb)proc(); });
+  $('cl-rm').addEventListener('click', rst);
+  $('cl-res').addEventListener('click', rst);
+  $('cl-dl').addEventListener('click', dld);
+
+  function rst(){wb=null;cleaned=null;orig='';$('cl-i').value='';$('cl-z').style.display='';['cl-b','cl-st','cl-pv'].forEach(id=>$(id).classList.remove('on'));$('cl-act').style.display='none';$('cl-ct').style.display='none';$('cl-p').classList.remove('on');}
+  async function load(f){
+    orig=f.name;$('cl-fn').textContent=f.name;$('cl-fs').textContent=fmts(f.size);
+    $('cl-z').style.display='none';$('cl-b').classList.add('on');
+    $('cl-p').classList.add('on');$('cl-pf').style.width='40%';
+    try{ const bin=await rdBin(f); $('cl-pf').style.width='80%'; wb=XLSX.read(bin,{type:'binary'}); $('cl-pf').style.width='100%'; setTimeout(()=>{$('cl-p').classList.remove('on');$('cl-pf').style.width='0%';proc();},280); }
+    catch(e){toast('❌','Gagal membaca file.');$('cl-p').classList.remove('on');}
+  }
+  function isEmpty(row){return row.every(c=>{if(c==null)return true;const v=tr?String(c).trim():String(c);return v===''||v==='undefined'||v==='null';});}
+  function proc(){
+    if(!wb)return;
+    const raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+    if(!raw.length){toast('⚠️','Sheet kosong.');return;}
+    const mc=Math.max(...raw.map(r=>r.length));
+    const norm=raw.map(r=>{const p=[...r];while(p.length<mc)p.push('');return tr?p.map(c=>typeof c==='string'?c.trim():c):p;});
+    const hd=norm[0],data=norm.slice(1),tot=data.length;
+    const cl=data.filter(r=>!isEmpty(r)),rm=tot-cl.length;
+    cleaned=[hd,...cl];
+    $('cl-s1').textContent=tot.toLocaleString('id');$('cl-s2').textContent=rm.toLocaleString('id');$('cl-s3').textContent=cl.length.toLocaleString('id');$('cl-s4').textContent=mc.toLocaleString('id');
+    $('cl-st').classList.add('on');$('cl-act').style.display='flex';$('cl-ct').style.display='inline-flex';
+    renderPrev('cl-pt','cl-pb','cl-mr','cl-pv',hd,cl);
+    toast(rm>0?'🧹':'✅',rm>0?`${rm} baris kosong ditemukan!`:'Tidak ada baris kosong.');
+  }
+  function dld(){if(!cleaned)return;const nwb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nwb,XLSX.utils.aoa_to_sheet(cleaned),'Clean Data');dlBlob(xblob(nwb),orig.replace(/\.[^.]+$/,'')+'_cleaned.xlsx');toast('📥','File berhasil didownload!');}
+})();
+
+/* ══════════════════════════════════════════════════════════
+   02 · CONVERTER
+══════════════════════════════════════════════════════════ */
+(function(){
+  let files=[], mode='file', folStr={};
+  const z=$('cv-z'),inp=$('cv-i'),finp=$('cv-fi');
+  z.addEventListener('click',e=>{if(e.target===inp||e.target===finp)return;if(mode==='file')inp.click();else finp.click();});
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag');});
+  z.addEventListener('dragleave',()=>z.classList.remove('drag'));
+  z.addEventListener('drop',async e=>{
+    e.preventDefault();z.classList.remove('drag');
+    let hd=false;for(let i=0;i<e.dataTransfer.items.length;i++){const en=e.dataTransfer.items[i].webkitGetAsEntry?.();if(en?.isDirectory){hd=true;break;}}
+    if(hd){cvM('folder');await foldDrop(e.dataTransfer.items);}else hndFiles(e.dataTransfer.files);
+  });
+  inp.addEventListener('change',e=>hndFiles(e.target.files));
+  finp.addEventListener('change',e=>foldUp(e.target.files));
+
+  window.cvM=function(m){
+    mode=m;$('cv-fm').classList.toggle('on',m==='file');$('cv-flm').classList.toggle('on',m==='folder');
+    if(m==='file'){$('cv-di').textContent='📄';$('cv-dt').textContent='Drag & drop atau klik untuk upload';$('cv-ds').textContent='Support: .xlsx · .csv';$('cv-foli').style.display='none';}
+    else{$('cv-di').textContent='📁';$('cv-dt').textContent='Drop folder di sini atau klik untuk pilih folder';$('cv-ds').textContent='Akan memproses semua .xlsx dan .csv dalam folder';}
+  };
+  async function foldDrop(items){files=[];folStr={};for(let i=0;i<items.length;i++){const en=items[i].webkitGetAsEntry?.();if(en?.isDirectory)await travDir(en,'');}updFol();updBtn();}
+  function foldUp(fl){files=[];folStr={};Array.from(fl).forEach(f=>{if(/\.(xlsx|csv)$/i.test(f.name)){const p=f.webkitRelativePath||f.name,folder=p.split('/').slice(0,-1).join('/');if(!folStr[folder])folStr[folder]=[];folStr[folder].push(f);files.push(f);}});updFol();updBtn();}
+  async function travDir(dir,path){const reader=dir.createReader();const entries=await new Promise(res=>reader.readEntries(res));for(const en of entries){const full=path?path+'/'+en.name:en.name;if(en.isDirectory)await travDir(en,full);else if(/\.(xlsx|csv)$/i.test(en.name)){const file=await new Promise(res=>en.file(res));if(!folStr[path])folStr[path]=[];folStr[path].push(file);files.push(file);}}}
+  function updFol(){$('cv-foli').style.display='block';const k=Object.keys(folStr);$('cv-foln').textContent='📁 '+(k[0]||'Root');$('cv-n1').textContent=files.length;$('cv-n2').textContent=files.filter(f=>f.name.endsWith('.xlsx')).length;$('cv-n3').textContent=files.filter(f=>f.name.endsWith('.csv')).length;$('cv-n4').textContent=fmts(files.reduce((s,f)=>s+f.size,0));}
+  function hndFiles(fl){files=Array.from(fl);rendList();updBtn();}
+  function rendList(){const el=$('cv-fl');if(!files.length){el.classList.remove('on');return;}el.classList.add('on');el.innerHTML=files.map((f,i)=>`<div class="fitem"><span class="fitem-n">${esc(f.name)}</span><span class="fitem-s">${fmts(f.size)}</span><button class="fitem-rm" onclick="cvRm(${i})">✕</button></div>`).join('');}
+  window.cvRm=function(i){files.splice(i,1);rendList();updBtn();};
+  function updBtn(){$('cv-btn').disabled=!files.length;if(files.length)cvStat('idle',`${files.length} file siap diproses`);}
+  function cvStat(t,m){$('cv-st').className='stbar '+t;$('cv-stx').textContent=m;}
+  function cvProg(pct,lbl){$('cv-pf').style.width=pct+'%';$('cv-pp').textContent=pct+'%';if(lbl)$('cv-pl').textContent=lbl;}
+  function cvShowP(s){$('cv-pw').classList.toggle('on',s);if(!s)cvProg(0,'Memproses...');}
+  window.cvProc=async function(){
+    const o1=$('cv-o1').checked,o2=$('cv-o2').checked,o3=$('cv-o3').checked,o4=$('cv-o4').checked;
+    if(!o1&&!o2&&!o3&&!o4){toast('⚠️','Pilih minimal satu operasi!');return;}
+    const out=$('cv-on').value||'combined_file',btn=$('cv-btn');
+    btn.disabled=true;cvShowP(true);cvStat('processing','Memproses...');
+    const tot=[o1,o2,o3,o4].filter(Boolean).length;let step=0;
+    try{
+      if(o1){cvProg(Math.round((step/tot)*100),'XLSX → CSV...');for(const f of files.filter(f=>f.name.endsWith('.xlsx'))){const d=await f.arrayBuffer(),wb=XLSX.read(d,{type:'array'}),csv=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);dlBlob(new Blob([csv],{type:'text/csv'}),f.name.replace('.xlsx','.csv'));}step++;}
+      if(o2){cvProg(Math.round((step/tot)*100),'CSV → XLSX...');for(const f of files.filter(f=>f.name.endsWith('.csv'))){const t=await f.text(),nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.csv_to_sheet(t),'Sheet1');dlBlob(xblob(nb),f.name.replace('.csv','.xlsx'));}step++;}
+      if(o3){cvProg(Math.round((step/tot)*100),'Gabung XLSX...');const xl=files.filter(f=>f.name.endsWith('.xlsx'));if(!xl.length)throw new Error('Tidak ada .xlsx!');const combined=[];let first=true;for(const f of xl){const d=await f.arrayBuffer(),wb=XLSX.read(d,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});if(first){combined.push(...rows);first=false;}else combined.push(...rows.slice(1));}const nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.aoa_to_sheet(combined),'Combined');dlBlob(xblob(nb),out+'.xlsx');step++;}
+      if(o4){cvProg(Math.round((step/tot)*100),'Gabung CSV...');const cf=files.filter(f=>f.name.endsWith('.csv'));if(!cf.length)throw new Error('Tidak ada .csv!');let combined='',first=true;for(const f of cf){const t=await f.text();if(first){combined+=t;first=false;}else combined+='\n'+t.split('\n').slice(1).join('\n');}dlBlob(new Blob([combined],{type:'text/csv'}),out+'.csv');const nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.csv_to_sheet(combined),'Combined');dlBlob(xblob(nb),out+'.xlsx');step++;}
+      cvProg(100,'Selesai!');cvStat('success','Semua proses selesai!');toast('🎉','Proses selesai!');
+    }catch(e){cvStat('error','Error: '+e.message);toast('❌',e.message);}
+    finally{btn.disabled=false;setTimeout(()=>cvShowP(false),2000);}
+  };
+})();
+
+/* ══════════════════════════════════════════════════════════
+   03 · SPLITTER
+══════════════════════════════════════════════════════════ */
+(function(){
+  window.spT=function(tab){document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('#p-splitter .tpanel').forEach(p=>p.classList.remove('on'));document.querySelector('.tbtn.'+tab).classList.add('on');$('tp-'+tab).classList.add('on');};
+  function sBar(p,f){$(p+'-fn').textContent=f.name;$(p+'-fs').textContent=fmts(f.size);$(p+'-b').classList.add('on');}
+  function cBar(p,iid){$(iid).value='';$(p+'-b').classList.remove('on');}
+  function sProg(p,pct,lbl){$(p+'-pf').style.width=pct+'%';$(p+'-pp').textContent=pct+'%';if(lbl)$(p+'-pl').textContent=lbl;}
+  function shProg(p,s){$(p+'-pw').classList.toggle('on',s);if(!s)sProg(p,0,'Memproses...');}
+  function sStat(p,m,t){$(p+'-stx').textContent=m;$(p+'-st').className='stbar '+(t||'idle');}
+
+  // ND
+  let ndF=null;
+  setupDZ('nd-z','nd-i',f=>{ndF=f;sBar('nd',f);$('nd-sb').disabled=false;sStat('nd','File siap — klik Split & Download ZIP');});
+  $('nd-rm').addEventListener('click',e=>{e.stopPropagation();ndF=null;cBar('nd','nd-i');$('nd-sb').disabled=true;sStat('nd','Belum ada file dipilih');});
+  $('nd-tb').addEventListener('click',()=>{
+    const wb=XLSX.utils.book_new(),hdr=['Nomor Perkiraan','Pusat Biaya','Nama Perkiraan','Keterangan Transaksi Jurnal','Src','Tanggal','No Voucher','Tahun Lalu','Debet','Kredit','Saldo Akhir'];
+    const rows=[['1101','PB001','Kas','Penerimaan Pendapatan Jasa','JU','01/01/2025','VCH-001',0,5000000,0,5000000],['1102','PB002','Bank BCA','Transfer dari Kas','BK','10/01/2025','VCH-003',0,2000000,0,2000000]];
+    const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);ws['!cols']=[{wch:20},{wch:14},{wch:22},{wch:35},{wch:8},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,'Template');XLSX.writeFile(wb,'Template_BB_ND.xlsx');sStat('nd','Template didownload ✓','success');setTimeout(()=>sStat('nd',ndF?'File siap':'Belum ada file'),2500);
+  });
+  $('nd-sb').addEventListener('click',async()=>{
+    if(!ndF)return;const btn=$('nd-sb');btn.disabled=true;sStat('nd','Memproses...','processing');shProg('nd',true);sProg('nd',20,'Membaca file...');
+    try{
+      const ab=await rdBuf(ndF),wb=XLSX.read(ab,{type:'array'}),raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+      if(raw.length<2)throw new Error('Data tidak cukup');
+      sProg('nd',50,'Menganalisa...');
+      const headers=raw[0],rows=raw.slice(1),iA=headers.indexOf('Nomor Perkiraan'),iN=headers.indexOf('Nama Perkiraan'),iK=headers.indexOf('Keterangan Transaksi Jurnal');
+      if(iA===-1||iN===-1||iK===-1)throw new Error("Kolom wajib tidak ditemukan");
+      const grouped={};
+      rows.forEach(r=>{if(!r?.length)return;const num=r[iA];if(!num)return;const key=String(num).replace(/_.*$/,'').trim();if(!grouped[key])grouped[key]={nama:r[iN]||'Unknown',rows:[]};grouped[key].rows.push(r);});
+      sProg('nd',70,'Membuat file...');
+      const zip=new JSZip(),base=ndF.name.replace(/\.[^/.]+$/,''),folder=zip.folder('Hasil_Pecah_'+base),entries=Object.entries(grouped);let done=0;
+      for(let i=0;i<entries.length;i+=5){
+        await Promise.all(entries.slice(i,i+5).map(([num,{nama,rows:r}])=>{const nc=String(nama).replace(/[^\w.]/g,'_').trim(),nwb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nwb,XLSX.utils.aoa_to_sheet([headers,...r]),'Sheet1');folder.file(num+'_'+nc+'.xlsx',xbuf(nwb));done++;}));
+        sProg('nd',Math.round(70+(done/entries.length)*25),'Memproses '+done+'/'+entries.length+' akun...');
+        await new Promise(r=>setTimeout(r,10));
+      }
+      sProg('nd',97,'ZIP...');const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+      dlBlob(blob,'Hasil_Pecah_'+base+'.zip');sProg('nd',100,'Selesai!');
+      setTimeout(()=>{sStat('nd','Selesai! '+entries.length+' file dalam ZIP ✓','success');shProg('nd',false);btn.disabled=false;},600);
+      toast('📦',`${entries.length} file berhasil di-split!`);
+    }catch(e){sStat('nd','Error: '+e.message,'error');shProg('nd',false);btn.disabled=false;toast('❌',e.message);}
+  });
+
+  // ACCURATE
+  let accF=null;
+  setupDZ('acc-z','acc-i',f=>{accF=f;sBar('acc',f);$('acc-sb').disabled=false;sStat('acc','File siap — klik Split & Download ZIP');});
+  $('acc-rm').addEventListener('click',e=>{e.stopPropagation();accF=null;cBar('acc','acc-i');$('acc-sb').disabled=true;sStat('acc','Belum ada file dipilih');});
+  $('acc-tb').addEventListener('click',()=>{
+    const wb=XLSX.utils.book_new(),hdr=['No Akun','Tanggal','Sumber','Nama Akun','No. Sumber','Nama Akun 2','Keterangan','Saldo sebelumnya','Code','Debit','Kredit','Balance'];
+    const rows=[["'1-10100",'01/01/2025','JU','Kas','JU-001','Kas & Bank','Penerimaan Kas',0,'DR',5000000,0,5000000]];
+    const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);ws['!cols']=[{wch:14},{wch:14},{wch:10},{wch:20},{wch:14},{wch:18},{wch:30},{wch:16},{wch:8},{wch:14},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,'Template');XLSX.writeFile(wb,'Template_BB_Accurate.xlsx');sStat('acc','Template didownload ✓','success');setTimeout(()=>sStat('acc',accF?'File siap':'Belum ada file'),2500);
+  });
+  $('acc-sb').addEventListener('click',async()=>{
+    if(!accF)return;const btn=$('acc-sb');btn.disabled=true;sStat('acc','Memproses...','processing');shProg('acc',true);sProg('acc',20,'Membaca file...');
+    try{
+      const ab=await rdBuf(accF),wb=XLSX.read(new Uint8Array(ab),{type:'array'}),raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+      const rawH=raw[0].map(h=>String(h||'').toLowerCase().replace(/\s+/g,' ').trim()),col=n=>rawH.findIndex(h=>h.includes(n.toLowerCase().trim()));
+      sProg('acc',50,'Menganalisa...');
+      const rows=[];for(let i=1;i<raw.length;i++){const r=raw[i];if(!r||r.every(c=>c===undefined||c===''))continue;rows.push({noAkun:"'"+(r[col('no akun')]??''),tanggal:r[col('tanggal')]??'',sumber:r[col('sumber')]??'',namaAkun:r[col('nama akun')]??'',noSumber:r[col('no. sumber')]??'',namaAkun2:r[col('nama akun 2')]??'',keterangan:r[col('keterangan')]??'',saldoSblm:r[col('saldo sebelumnya')]??'',code:r[col('code')]??'',debit:r[col('debit')]??'',kredit:r[col('kredit')]??'',balance:r[col('balance')]??''});}
+      if(!rows.length)throw new Error('Tidak ada data yang ditemukan');
+      const grouped={};rows.forEach(r=>{const k=r.noAkun+' - '+(r.namaAkun||'Tanpa_Nama');if(!grouped[k])grouped[k]=[];grouped[k].push(r);});
+      sProg('acc',70,'Membuat '+Object.keys(grouped).length+' file...');
+      const zip=new JSZip(),base=accF.name.replace(/\.[^/.]+$/,'').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'_').substring(0,80);
+      const outHdr=['No Akun','Tanggal','Sumber','Nama Akun','No. Sumber','Nama Akun 2','Keterangan','Saldo sebelumnya','Code','Debit','Kredit','Balance'];
+      const entries=Object.entries(grouped);let done=0;
+      for(let i=0;i<entries.length;i+=5){
+        await Promise.all(entries.slice(i,i+5).map(([key,r])=>{const wsD=[outHdr,...r.map(row=>[row.noAkun,row.tanggal,row.sumber,row.namaAkun,row.noSumber,row.namaAkun2,row.keterangan,row.saldoSblm,row.code,row.debit,row.kredit,row.balance])],nwb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nwb,XLSX.utils.aoa_to_sheet(wsD),'Data');zip.file(key.replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'_').substring(0,80)+'.xlsx',xbuf(nwb));done++;}));
+        sProg('acc',Math.round(70+(done/entries.length)*25),'Memproses '+done+'/'+entries.length+'...');
+        await new Promise(r=>setTimeout(r,10));
+      }
+      sProg('acc',97,'ZIP...');const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+      dlBlob(blob,base+'_split_'+new Date().toISOString().slice(0,10)+'.zip');sProg('acc',100,'Selesai!');
+      setTimeout(()=>{sStat('acc','Selesai! '+entries.length+' file dalam ZIP ✓','success');shProg('acc',false);btn.disabled=false;},600);
+      toast('📦',`${entries.length} file Accurate berhasil di-split!`);
+    }catch(e){sStat('acc','Error: '+e.message,'error');shProg('acc',false);btn.disabled=false;toast('❌',e.message);}
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════
+   04 · DEDUP
+══════════════════════════════════════════════════════════ */
+(function(){
+  let wb=null,orig='',cleaned=null;
+  setupDZ('dd-z','dd-i',f=>load(f));
+  $('dd-rm').addEventListener('click',rst);$('dd-res').addEventListener('click',rst);$('dd-dl').addEventListener('click',dld);
+  function rst(){wb=null;orig='';cleaned=null;$('dd-i').value='';$('dd-z').style.display='';$('dd-b').classList.remove('on');$('dd-cc').style.display='none';$('dd-st').classList.remove('on');$('dd-act').style.display='none';$('dd-pv').classList.remove('on');$('dd-p').classList.remove('on');}
+  async function load(f){orig=f.name;$('dd-fn').textContent=f.name;$('dd-fs').textContent=fmts(f.size);$('dd-z').style.display='none';$('dd-b').classList.add('on');$('dd-p').classList.add('on');$('dd-pf').style.width='40%';try{const bin=await rdBin(f);$('dd-pf').style.width='80%';wb=XLSX.read(bin,{type:'binary'});$('dd-pf').style.width='100%';setTimeout(()=>{$('dd-p').classList.remove('on');$('dd-pf').style.width='0%';buildCols();},280);}catch(e){toast('❌','Gagal membaca file.');$('dd-p').classList.remove('on');}}
+  function buildCols(){const raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});if(!raw.length){toast('⚠️','Sheet kosong.');return;}const headers=raw[0].map((h,i)=>h||'Col '+(i+1));$('dd-cols').innerHTML=headers.map((h,i)=>`<label class="cpi"><input type="checkbox" class="dd-cb" data-i="${i}" checked><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"title="${esc(String(h))}">${esc(String(h))}</span></label>`).join('');$('dd-cc').style.display='block';document.querySelectorAll('.dd-cb').forEach(cb=>cb.addEventListener('change',()=>proc()));proc();}
+  function proc(){if(!wb)return;const raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}),header=raw[0],data=raw.slice(1),idx=Array.from(document.querySelectorAll('.dd-cb:checked')).map(cb=>+cb.dataset.i);if(!idx.length){toast('⚠️','Pilih minimal 1 kolom!');return;}const seen=new Set(),uniq=data.filter(row=>{const k=idx.map(i=>String(row[i]??'')).join('\x00');if(seen.has(k))return false;seen.add(k);return true;});const tot=data.length,dup=tot-uniq.length;cleaned=[header,...uniq];$('dd-n1').textContent=tot.toLocaleString('id');$('dd-n2').textContent=dup.toLocaleString('id');$('dd-n3').textContent=uniq.length.toLocaleString('id');$('dd-st').classList.add('on');$('dd-act').style.display='flex';renderPrev('dd-pt','dd-pb','dd-mr','dd-pv',header,uniq);if(dup>0)toast('🔍',`${dup} baris duplikat ditemukan!`);else toast('✅','Tidak ada duplikat.');}
+  window.ddAll=function(v){document.querySelectorAll('.dd-cb').forEach(cb=>cb.checked=v);proc();};
+  function dld(){if(!cleaned)return;const nwb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nwb,XLSX.utils.aoa_to_sheet(cleaned),'Deduplicated');dlBlob(xblob(nwb),orig.replace(/\.[^.]+$/,'')+'_dedup.xlsx');toast('📥','File tanpa duplikat berhasil didownload!');}
+})();
+
+/* ══════════════════════════════════════════════════════════
+   05 · COLUMN MAPPER
+══════════════════════════════════════════════════════════ */
+(function(){
+  let wb=null,orig='',rawHeaders=[],rawData=[];
+  setupDZ('cm-z','cm-i',f=>load(f));
+  $('cm-rm').addEventListener('click',rst);$('cm-res').addEventListener('click',rst);$('cm-dl').addEventListener('click',dld);
+  function rst(){wb=null;orig='';rawHeaders=[];rawData=[];$('cm-i').value='';$('cm-z').style.display='';$('cm-b').classList.remove('on');$('cm-editor').style.display='none';$('cm-act').style.display='none';$('cm-p').classList.remove('on');}
+  async function load(f){orig=f.name;$('cm-fn').textContent=f.name;$('cm-fs').textContent=fmts(f.size);$('cm-z').style.display='none';$('cm-b').classList.add('on');$('cm-p').classList.add('on');$('cm-pf').style.width='50%';try{const bin=await rdBin(f);wb=XLSX.read(bin,{type:'binary'});const raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});rawHeaders=raw[0]||[];rawData=raw.slice(1);$('cm-pf').style.width='100%';setTimeout(()=>{$('cm-p').classList.remove('on');$('cm-pf').style.width='0%';buildEditor();},280);}catch(e){toast('❌','Gagal membaca file.');$('cm-p').classList.remove('on');}}
+  function buildEditor(){
+    $('cm-rows').innerHTML=rawHeaders.map((h,i)=>`
+      <div class="fmt-rule" id="cmr-${i}" style="gap:8px;">
+        <input type="checkbox" class="cm-cb" data-i="${i}" checked style="appearance:none;width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);background:white;cursor:pointer;flex-shrink:0;position:relative;transition:all .15s;" onchange="cmUpdate()">
+        <span class="fmt-tag" style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;" title="${esc(String(h))}">${esc(String(h))}</span>
+        <input type="text" class="col-rename" placeholder="Nama baru (opsional)" value="${esc(String(h))}" style="flex:1;" oninput="cmUpdate()">
+        <button class="col-order-btn" onclick="cmMove(${i},-1)" title="Geser atas">↑</button>
+        <button class="col-order-btn" onclick="cmMove(${i},1)" title="Geser bawah">↓</button>
+      </div>`).join('');
+    // style checkboxes
+    document.querySelectorAll('.cm-cb').forEach(cb=>{cb.addEventListener('change',()=>{if(cb.checked){cb.style.background='var(--c5)';cb.style.borderColor='var(--c5)';}else{cb.style.background='white';cb.style.borderColor='var(--border2)';}});cb.style.background='var(--c5)';cb.style.borderColor='var(--c5)';});
+    $('cm-editor').style.display='block';$('cm-act').style.display='flex';
+    toast('🗂️',`${rawHeaders.length} kolom ditemukan — atur sesuai kebutuhan!`);
+  }
+  window.cmUpdate=function(){};
+  window.cmSelectAll=function(v){document.querySelectorAll('.cm-cb').forEach(cb=>{cb.checked=v;if(v){cb.style.background='var(--c5)';cb.style.borderColor='var(--c5)';}else{cb.style.background='white';cb.style.borderColor='var(--border2)';}});};
+  window.cmMove=function(idx,dir){
+    // swap rows visually
+    const rows=Array.from($('cm-rows').children);
+    const targetIdx=idx+dir;
+    if(targetIdx<0||targetIdx>=rows.length)return;
+    const a=rows[idx],b=rows[targetIdx];
+    if(dir===-1)$('cm-rows').insertBefore(a,b);
+    else $('cm-rows').insertBefore(b,a);
+  };
+  function dld(){
+    if(!wb)return;
+    // get current order from DOM
+    const rows=Array.from($('cm-rows').children);
+    const mapping=rows.map(row=>{
+      const cb=row.querySelector('.cm-cb'),rename=row.querySelector('.col-rename');
+      const origIdx=+cb.dataset.i;
+      return{include:cb.checked,origIdx,newName:rename.value||rawHeaders[origIdx]};
+    }).filter(m=>m.include);
+    if(!mapping.length){toast('⚠️','Pilih minimal 1 kolom!');return;}
+    const newHeader=mapping.map(m=>m.newName);
+    const newData=rawData.map(row=>mapping.map(m=>row[m.origIdx]??''));
+    const nwb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nwb,XLSX.utils.aoa_to_sheet([newHeader,...newData]),'Mapped');
+    dlBlob(xblob(nwb),orig.replace(/\.[^.]+$/,'')+'_mapped.xlsx');toast('📥',`${mapping.length} kolom berhasil didownload!`);
+  }
+})();
+
+/* ══════════════════════════════════════════════════════════
+   06 · FORMULA AI
+══════════════════════════════════════════════════════════ */
+(function(){
+  let history=[];
+  const chips=[
+    'Jumlahkan nilai di kolom B jika kolom A = "Aktif"',
+    'Hitung rata-rata angka di C2:C100 yang lebih dari 0',
+    'VLOOKUP nama produk dari sheet2 berdasarkan kode di A1',
+    'Hitung umur dari tanggal lahir di kolom B',
+    'Buat dropdown validasi dari daftar di sheet2!A1:A20',
+    'Highlight sel merah jika nilainya duplikat',
+    'Gabungkan teks kolom A dan B dengan spasi di tengah',
+    'Hitung jumlah baris yang tidak kosong di kolom C',
+  ];
+  $('fm-chips').innerHTML=chips.map(c=>`<button onclick="fmChip(this)" style="padding:6px 12px;border:1px solid var(--border2);border-radius:100px;background:white;font-family:'Outfit',sans-serif;font-size:11px;color:var(--ink3);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--c6)';this.style.color='var(--c6)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--ink3)'">${esc(c)}</button>`).join('');
+
+  window.fmChip=function(el){$('fm-input').value=el.textContent;$('fm-input').focus();};
+
+  window.fmGenerate=async function(){
+    const q=$('fm-input').value.trim();
+    if(!q){toast('⚠️','Deskripikan dulu apa yang lo mau!');return;}
+    $('fm-result').classList.remove('on');
+    $('fm-spin').classList.add('on');
+    $('fm-btn').disabled=true;
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1000,
+          system:`Kamu adalah ahli Excel. User akan mendeskripsikan kebutuhan dalam bahasa Indonesia, dan kamu harus memberikan rumus Excel yang tepat.
+
+Balas HANYA dengan format JSON berikut (tanpa markdown, tanpa penjelasan lain):
+{"formula":"=RUMUS_EXCEL_DISINI","explanation":"Penjelasan singkat cara kerja rumus ini dalam 1-2 kalimat bahasa Indonesia.","tips":"Tips tambahan atau alternatif (opsional, bisa string kosong)"}`,
+          messages:[{role:'user',content:q}]
+        })
+      });
+      const data=await res.json();
+      const text=data.content?.find(c=>c.type==='text')?.text||'';
+      let parsed;
+      try{parsed=JSON.parse(text.replace(/```json|```/g,'').trim());}
+      catch{parsed={formula:text,explanation:'',tips:''};}
+      $('fm-formula').textContent=parsed.formula;
+      $('fm-explain').textContent=(parsed.explanation||'')+(parsed.tips?'\n\n💡 '+parsed.tips:'');
+      $('fm-result').classList.add('on');
+      // add to history
+      history.unshift({q,formula:parsed.formula,explain:parsed.explanation});
+      if(history.length>10)history.pop();
+      renderHistory();
+      toast('✨','Formula berhasil di-generate!');
+    }catch(e){toast('❌','Gagal generate formula: '+e.message);}
+    finally{$('fm-spin').classList.remove('on');$('fm-btn').disabled=false;}
+  };
+
+  window.fmCopy=function(){const f=$('fm-formula').textContent;navigator.clipboard.writeText(f).then(()=>toast('📋','Formula disalin!')).catch(()=>{const ta=document.createElement('textarea');ta.value=f;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋','Formula disalin!');});};
+
+  function renderHistory(){
+    if(!history.length){$('fm-history').innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0;">Belum ada riwayat.</div>';return;}
+    $('fm-history').innerHTML=history.map((h,i)=>`
+      <div style="padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onclick="fmFromHistory(${i})">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(h.q)}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--c6);font-weight:500;">${esc(h.formula)}</div>
+      </div>`).join('');
+  }
+  window.fmFromHistory=function(i){const h=history[i];$('fm-formula').textContent=h.formula;$('fm-explain').textContent=h.explain;$('fm-result').classList.add('on');$('fm-input').value=h.q;window.scrollTo({top:0,behavior:'smooth'});};
+
+  // init
+  renderHistory();
+})();
+
+/* ══════════════════════════════════════════════════════════
+   07 · DATA FORMATTER
+══════════════════════════════════════════════════════════ */
+(function(){
+  let wb=null,orig='',rawHeaders=[],rawData=[];
+  setupDZ('ft-z','ft-i',f=>load(f));
+  $('ft-rm').addEventListener('click',rst);$('ft-res').addEventListener('click',rst);$('ft-dl').addEventListener('click',dld);
+
+  function rst(){wb=null;orig='';rawHeaders=[];rawData=[];$('ft-i').value='';$('ft-z').style.display='';$('ft-b').classList.remove('on');$('ft-editor').style.display='none';$('ft-act').style.display='none';$('ft-pv').classList.remove('on');$('ft-p').classList.remove('on');}
+
+  async function load(f){
+    orig=f.name;$('ft-fn').textContent=f.name;$('ft-fs').textContent=fmts(f.size);$('ft-z').style.display='none';$('ft-b').classList.add('on');
+    $('ft-p').classList.add('on');$('ft-pf').style.width='50%';
+    try{const bin=await rdBin(f);wb=XLSX.read(bin,{type:'binary'});const raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});rawHeaders=raw[0]||[];rawData=raw.slice(1);$('ft-pf').style.width='100%';setTimeout(()=>{$('ft-p').classList.remove('on');$('ft-pf').style.width='0%';buildEditor();},280);}
+    catch(e){toast('❌','Gagal membaca file.');$('ft-p').classList.remove('on');}
+  }
+
+  function buildEditor(){$('ft-editor').style.display='block';$('ft-rules').innerHTML='';ftAddRule();$('ft-act').style.display='flex';applyAndPreview();}
+
+  const fmtTypes=[
+    {v:'none',l:'— Tidak ada transformasi'},
+    {v:'upper',l:'UPPERCASE'},
+    {v:'lower',l:'lowercase'},
+    {v:'proper',l:'Proper Case (Huruf Besar Tiap Kata)'},
+    {v:'trim',l:'Trim Spasi'},
+    {v:'num_comma',l:'Angka: 1.000.000 (titik ribuan)'},
+    {v:'num_dot',l:'Angka: 1,000,000 (koma ribuan)'},
+    {v:'num_rupiah',l:'Format Rupiah: Rp 1.000.000'},
+    {v:'num_round0',l:'Bulatkan ke bilangan bulat'},
+    {v:'num_round2',l:'Bulatkan 2 desimal'},
+    {v:'date_id',l:'Tanggal: 01 Januari 2025'},
+    {v:'date_iso',l:'Tanggal: 2025-01-01'},
+    {v:'date_slash',l:'Tanggal: 01/01/2025'},
+    {v:'remove_spaces',l:'Hapus semua spasi'},
+    {v:'remove_special',l:'Hapus karakter non-huruf/angka'},
+    {v:'prefix',l:'Tambah Prefix (awalan)'},
+    {v:'suffix',l:'Tambah Suffix (akhiran)'},
+  ];
+
+  const monthId=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+  function applyFmt(val, type, extra) {
+    const s = String(val ?? '');
+    const n = parseFloat(s.replace(/[^0-9.-]/g,''));
+    switch(type){
+      case 'upper': return s.toUpperCase();
+      case 'lower': return s.toLowerCase();
+      case 'proper': return s.replace(/\b\w/g,c=>c.toUpperCase()).replace(/\B\w/g,c=>c.toLowerCase());
+      case 'trim': return s.trim();
+      case 'num_comma': return isNaN(n)?s:n.toLocaleString('id-ID');
+      case 'num_dot': return isNaN(n)?s:n.toLocaleString('en-US');
+      case 'num_rupiah': return isNaN(n)?s:'Rp '+n.toLocaleString('id-ID');
+      case 'num_round0': return isNaN(n)?s:String(Math.round(n));
+      case 'num_round2': return isNaN(n)?s:n.toFixed(2);
+      case 'date_id': { const d=new Date(s); return isNaN(d)?s:`${d.getDate().toString().padStart(2,'0')} ${monthId[d.getMonth()]} ${d.getFullYear()}`; }
+      case 'date_iso': { const d=new Date(s); return isNaN(d)?s:d.toISOString().slice(0,10); }
+      case 'date_slash': { const d=new Date(s); return isNaN(d)?s:`${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; }
+      case 'remove_spaces': return s.replace(/\s+/g,'');
+      case 'remove_special': return s.replace(/[^a-zA-Z0-9\s]/g,'');
+      case 'prefix': return (extra||'')+s;
+      case 'suffix': return s+(extra||'');
+      default: return val;
+    }
+  }
+
+  window.ftAddRule=function(){
+    const idx=Date.now();
+    const colOpts=rawHeaders.map((h,i)=>`<option value="${i}">${esc(String(h))}</option>`).join('');
+    const typeOpts=fmtTypes.map(t=>`<option value="${t.v}">${t.l}</option>`).join('');
+    const div=document.createElement('div');
+    div.className='fmt-rule';div.id='ftr-'+idx;
+    div.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;margin-bottom:7px;flex-wrap:wrap;';
+    div.innerHTML=`
+      <select class="fmt-select ft-col" data-rule="${idx}" onchange="applyAndPreview()"><option value="">— Pilih Kolom —</option>${colOpts}</select>
+      <select class="fmt-select ft-type" data-rule="${idx}" onchange="ftTypeChange(this,${idx});applyAndPreview()"><option value="none">— Format —</option>${typeOpts}</select>
+      <input type="text" class="fmt-select ft-extra" id="fte-${idx}" placeholder="teks..." style="display:none;width:100px;" oninput="applyAndPreview()">
+      <button onclick="document.getElementById('ftr-${idx}').remove();applyAndPreview()" style="background:rgba(191,48,48,.08);border:1px solid rgba(191,48,48,.2);border-radius:6px;padding:5px 9px;color:var(--danger);cursor:pointer;font-size:12px;transition:all .15s;" onmouseover="this.style.background='rgba(191,48,48,.18)'" onmouseout="this.style.background='rgba(191,48,48,.08)'">✕</button>
+    `;
+    $('ft-rules').appendChild(div);
+  };
+
+  window.ftTypeChange=function(sel,idx){const extra=$('fte-'+idx);extra.style.display=(sel.value==='prefix'||sel.value==='suffix')?'':'none';};
+
+  window.applyAndPreview=function(){
+    if(!wb||!rawHeaders.length)return;
+    const rules=Array.from(document.querySelectorAll('.fmt-rule')).map(row=>{
+      const col=row.querySelector('.ft-col')?.value;
+      const type=row.querySelector('.ft-type')?.value;
+      const extra=row.querySelector('.fmt-select.ft-extra')?.value||'';
+      return{col,type,extra};
+    }).filter(r=>r.col!==''&&r.col!==undefined&&r.type&&r.type!=='none');
+    const newData=rawData.map(row=>{
+      const r=[...row];
+      rules.forEach(rule=>{const ci=+rule.col;r[ci]=applyFmt(r[ci],rule.type,rule.extra);});
+      return r;
+    });
+    renderPrev('ft-pt','ft-pb','ft-mr','ft-pv',rawHeaders,newData);
+    window._ftData=[rawHeaders,...newData];
+  };
+
+  function dld(){
+    if(!window._ftData){toast('⚠️','Belum ada data yang diformat.');return;}
+    const nwb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nwb,XLSX.utils.aoa_to_sheet(window._ftData),'Formatted');
+    dlBlob(xblob(nwb),orig.replace(/\.[^.]+$/,'')+'_formatted.xlsx');toast('📥','Data terformat berhasil didownload!');
+  }
+})();
+</script>
+</body>
+</html>
