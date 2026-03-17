@@ -327,29 +327,7 @@ tr:hover td{background:var(--bg);}
 .col-order-btn:hover{background:var(--bg2);color:var(--ink);}
 .arrow-col{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:18px;color:var(--muted);}
 
-/* ─── FORMULA RESULT ─────────────────────────────────────── */
-.formula-result{
-  background:var(--ink);color:#e8f5e9;
-  border-radius:12px;padding:18px 20px;margin-top:14px;
-  font-family:'JetBrains Mono',monospace;font-size:14px;
-  position:relative;display:none;
-  box-shadow:var(--sh3);
-}
-.formula-result.on{display:block;}
-.formula-copy{
-  position:absolute;top:12px;right:12px;
-  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
-  color:rgba(255,255,255,.7);font-family:'JetBrains Mono',monospace;
-  font-size:10px;padding:5px 12px;border-radius:6px;cursor:pointer;
-  transition:all .15s;letter-spacing:.05em;
-}
-.formula-copy:hover{background:rgba(255,255,255,.18);color:white;}
-.formula-main{font-size:16px;color:#a5d6a7;margin-bottom:10px;word-break:break-all;}
-.formula-explain{font-size:12px;color:rgba(255,255,255,.55);line-height:1.7;}
-.formula-spinner{display:none;align-items:center;gap:10px;padding:16px 18px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-top:12px;font-size:13px;color:var(--muted);}
-.formula-spinner.on{display:flex;}
-.spin{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--c6);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* formula styles removed */
 
 /* ─── FORMATTER ──────────────────────────────────────────── */
 .fmt-rule{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;margin-bottom:7px;flex-wrap:wrap;}
@@ -440,14 +418,11 @@ tr:hover td{background:var(--bg);}
 #p-colmap .slim-pf{background:var(--c5)}
 #p-colmap .btn-main{background:var(--c5);color:white;}
 #p-colmap .btn-main:hover:not(:disabled){background:#124567;box-shadow:0 6px 20px rgba(26,95,138,.3);}
-/* Formula */
+/* Formula Library */
 #p-formula .ph-tag{color:var(--c6)}
 #p-formula .ph-badge{color:var(--c6)}
 #p-formula .card-bar{background:var(--c6)}
-#p-formula .stextarea:focus{border-color:var(--c6);}
-#p-formula .btn-main{background:var(--c6);color:white;}
-#p-formula .btn-main:hover:not(:disabled){background:#6a1a3e;box-shadow:0 6px 20px rgba(139,34,82,.3);}
-#p-formula .stbar-dot.on{background:var(--c6);}
+#p-formula .sinput:focus{border-color:var(--c6);}
 /* Formatter */
 #p-formatter .ph-tag{color:var(--c7)}
 #p-formatter .ph-badge{color:var(--c7)}
@@ -495,7 +470,7 @@ tr:hover td{background:var(--bg);}
     <button class="sbt"        data-tool="splitter"  onclick="nav('splitter',this)"> <span class="sbt-dot"></span>✂️ Splitter BB      <span class="sbt-num">03</span></button>
     <button class="sbt"        data-tool="dedup"     onclick="nav('dedup',this)">    <span class="sbt-dot"></span>🔍 Duplikat Remover <span class="sbt-num">04</span></button>
     <button class="sbt"        data-tool="colmap"    onclick="nav('colmap',this)">   <span class="sbt-dot"></span>🗂️ Column Mapper    <span class="sbt-num">05</span></button>
-    <button class="sbt"        data-tool="formula"   onclick="nav('formula',this)">  <span class="sbt-dot"></span>✨ Formula AI       <span class="sbt-num">06</span></button>
+    <button class="sbt"        data-tool="formula"   onclick="nav('formula',this)">  <span class="sbt-dot"></span>📚 Formula Library  <span class="sbt-num">06</span></button>
     <button class="sbt"        data-tool="formatter" onclick="nav('formatter',this)"><span class="sbt-dot"></span>🎨 Data Formatter   <span class="sbt-num">07</span></button>
   </div>
 
@@ -737,42 +712,31 @@ tr:hover td{background:var(--bg);}
   </div>
 </div>
 
-<!-- ──────────────── 06 FORMULA AI ──────────────── -->
+<!-- ──────────────── 06 FORMULA LIBRARY ──────────────── -->
 <div class="panel" id="p-formula">
   <div class="ph">
     <div class="ph-left">
-      <div class="ph-tag">Tool 06 · Formula AI</div>
-      <div class="ph-title">Excel Formula Generator</div>
-      <div class="ph-desc">Deskripsikan apa yang lo mau lakukan dalam bahasa Indonesia — AI akan buatkan rumus Excel yang tepat beserta penjelasannya.</div>
+      <div class="ph-tag">Tool 06 · Formula Library</div>
+      <div class="ph-title">Referensi Rumus Excel</div>
+      <div class="ph-desc">60+ rumus Excel siap pakai — cari, browse per kategori, lihat contoh lengkap, dan copy langsung ke clipboard.</div>
     </div>
-    <div class="ph-badge">AI POWERED</div>
+    <div class="ph-badge">60+ RUMUS</div>
   </div>
 
-  <div class="card">
-    <div class="card-bar"></div><div class="clabel">Deskripsikan Kebutuhan</div>
-    <div style="margin-bottom:10px;">
-      <textarea class="stextarea" id="fm-input" placeholder="Contoh: Hitung total penjualan di kolom C yang datanya lebih dari 100 ribu&#10;&#10;Atau: Cari nama di sheet2 kolom A berdasarkan ID di kolom B sheet1&#10;&#10;Atau: Buat rumus untuk menghitung umur dalam tahun dari tanggal lahir di A1"></textarea>
+  <!-- Search + filter -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-bar"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="fl-search" class="sinput" placeholder="🔍  Cari rumus, contoh, atau kata kunci..." style="flex:1;min-width:200px;font-size:13px;" oninput="flFilter()">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="fl-cats"></div>
     </div>
-    <div style="margin-bottom:12px;">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Contoh cepat</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="fm-chips"></div>
-    </div>
-    <button class="btn btn-main" id="fm-btn" onclick="fmGenerate()">✨&ensp;Generate Formula</button>
-    <div class="formula-spinner" id="fm-spin"><div class="spin"></div><span>AI sedang menyusun rumus...</span></div>
   </div>
 
-  <div class="formula-result" id="fm-result">
-    <button class="formula-copy" id="fm-copy" onclick="fmCopy()">Copy</button>
-    <div class="formula-main" id="fm-formula"></div>
-    <div class="formula-explain" id="fm-explain"></div>
-  </div>
+  <!-- Results count -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;" id="fl-count"></div>
 
-  <div class="card" style="margin-top:14px;">
-    <div class="card-bar"></div><div class="clabel">Riwayat Formula</div>
-    <div id="fm-history" style="display:flex;flex-direction:column;gap:8px;min-height:40px;">
-      <div style="font-size:12px;color:var(--muted);padding:8px 0;">Belum ada riwayat — generate formula pertama lo!</div>
-    </div>
-  </div>
+  <!-- Cards grid -->
+  <div id="fl-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;"></div>
 </div>
 
 <!-- ──────────────── 07 FORMATTER ──────────────── -->
@@ -1117,75 +1081,183 @@ function nav(id, el) {
 })();
 
 /* ══════════════════════════════════════════════════════════
-   06 · FORMULA AI
+   06 · FORMULA LIBRARY
 ══════════════════════════════════════════════════════════ */
 (function(){
-  let history=[];
-  const chips=[
-    'Jumlahkan nilai di kolom B jika kolom A = "Aktif"',
-    'Hitung rata-rata angka di C2:C100 yang lebih dari 0',
-    'VLOOKUP nama produk dari sheet2 berdasarkan kode di A1',
-    'Hitung umur dari tanggal lahir di kolom B',
-    'Buat dropdown validasi dari daftar di sheet2!A1:A20',
-    'Highlight sel merah jika nilainya duplikat',
-    'Gabungkan teks kolom A dan B dengan spasi di tengah',
-    'Hitung jumlah baris yang tidak kosong di kolom C',
+  const DB=[
+    // ── MATEMATIKA & STATISTIK ──────────────────────────────
+    {cat:'Matematika',icon:'🔢',name:'SUM',syntax:'=SUM(A1:A10)',desc:'Jumlahkan semua nilai dalam rentang sel.',contoh:'=SUM(B2:B100)',tips:'Gunakan SUM(B:B) untuk seluruh kolom.'},
+    {cat:'Matematika',icon:'🔢',name:'SUMIF',syntax:'=SUMIF(range, kriteria, sum_range)',desc:'Jumlahkan sel yang memenuhi satu kriteria tertentu.',contoh:'=SUMIF(A:A,"Aktif",B:B)',tips:'Kriteria bisa pakai wildcard: "Jan*" untuk kata yang diawali "Jan".'},
+    {cat:'Matematika',icon:'🔢',name:'SUMIFS',syntax:'=SUMIFS(sum_range, range1, kr1, range2, kr2)',desc:'Jumlahkan sel yang memenuhi beberapa kriteria sekaligus.',contoh:'=SUMIFS(C:C,A:A,"Jakarta",B:B,">100000")',tips:'Bisa tambah hingga 127 pasang range+kriteria.'},
+    {cat:'Matematika',icon:'🔢',name:'AVERAGE',syntax:'=AVERAGE(A1:A10)',desc:'Hitung rata-rata nilai dari sekumpulan angka.',contoh:'=AVERAGE(C2:C50)',tips:'Sel kosong diabaikan, sel dengan angka 0 dihitung.'},
+    {cat:'Matematika',icon:'🔢',name:'AVERAGEIF',syntax:'=AVERAGEIF(range, kriteria, avg_range)',desc:'Rata-rata sel yang memenuhi satu kondisi.',contoh:'=AVERAGEIF(B:B,"Laki-laki",C:C)',tips:''},
+    {cat:'Matematika',icon:'🔢',name:'COUNT',syntax:'=COUNT(A1:A100)',desc:'Hitung jumlah sel yang berisi angka.',contoh:'=COUNT(B2:B200)',tips:'Gunakan COUNTA untuk menghitung semua sel tidak kosong.'},
+    {cat:'Matematika',icon:'🔢',name:'COUNTA',syntax:'=COUNTA(A1:A100)',desc:'Hitung jumlah sel yang tidak kosong (termasuk teks).',contoh:'=COUNTA(A:A)-1',tips:'Kurangi 1 jika ada header.'},
+    {cat:'Matematika',icon:'🔢',name:'COUNTIF',syntax:'=COUNTIF(range, kriteria)',desc:'Hitung sel yang memenuhi satu kriteria.',contoh:'=COUNTIF(A:A,"Jakarta")',tips:'Pakai COUNTIF(A:A,A2)>1 untuk deteksi duplikat.'},
+    {cat:'Matematika',icon:'🔢',name:'COUNTIFS',syntax:'=COUNTIFS(range1, kr1, range2, kr2)',desc:'Hitung sel yang memenuhi beberapa kriteria.',contoh:'=COUNTIFS(A:A,"Aktif",B:B,">=50")',tips:''},
+    {cat:'Matematika',icon:'🔢',name:'MAX / MIN',syntax:'=MAX(A1:A100) / =MIN(A1:A100)',desc:'Temukan nilai terbesar atau terkecil.',contoh:'=MAX(B2:B100)',tips:'Gunakan MAXIFS/MINIFS untuk max/min bersyarat (Excel 2019+).'},
+    {cat:'Matematika',icon:'🔢',name:'ROUND',syntax:'=ROUND(angka, desimal)',desc:'Bulatkan angka ke jumlah desimal tertentu.',contoh:'=ROUND(A1/B1, 2)',tips:'ROUNDUP selalu ke atas, ROUNDDOWN selalu ke bawah.'},
+    {cat:'Matematika',icon:'🔢',name:'MOD',syntax:'=MOD(angka, pembagi)',desc:'Sisa hasil bagi (modulo).',contoh:'=MOD(A1,2) → 0 berarti genap, 1 berarti ganjil',tips:'Berguna untuk memberi warna berselang pada baris.'},
+    {cat:'Matematika',icon:'🔢',name:'ABS',syntax:'=ABS(angka)',desc:'Nilai absolut (mutlak) — selalu positif.',contoh:'=ABS(A1-B1)',tips:'Berguna untuk menghitung selisih tanpa peduli arah.'},
+    {cat:'Matematika',icon:'🔢',name:'RANK',syntax:'=RANK(angka, ref, [order])',desc:'Peringkat angka dalam daftar. Order 0 = terbesar pertama.',contoh:'=RANK(B2,B$2:B$100,0)',tips:'Gunakan RANK.EQ di Excel versi baru.'},
+    {cat:'Matematika',icon:'🔢',name:'SUBTOTAL',syntax:'=SUBTOTAL(function_num, ref)',desc:'Hitung subtotal, mengabaikan baris yang tersembunyi.',contoh:'=SUBTOTAL(9,B2:B100) → SUM yang ignore hidden rows',tips:'9=SUM, 1=AVERAGE, 2=COUNT, 102=COUNT ignore hidden.'},
+
+    // ── TEKS ───────────────────────────────────────────────
+    {cat:'Teks',icon:'✍️',name:'CONCATENATE / &',syntax:'=CONCATENATE(A1," ",B1) atau =A1&" "&B1',desc:'Gabungkan beberapa teks menjadi satu.',contoh:'=A1&" "&B1&" ("&C1&")"',tips:'Di Excel 2019+, pakai TEXTJOIN untuk gabung dengan pemisah.'},
+    {cat:'Teks',icon:'✍️',name:'TEXTJOIN',syntax:'=TEXTJOIN(pemisah, ignore_empty, teks1, teks2...)',desc:'Gabungkan teks dengan pemisah, bisa abaikan sel kosong.',contoh:'=TEXTJOIN(", ",TRUE,A2:A10)',tips:'Sangat berguna untuk gabung banyak sel dengan koma.'},
+    {cat:'Teks',icon:'✍️',name:'LEFT / RIGHT / MID',syntax:'=LEFT(teks, n) / =RIGHT(teks, n) / =MID(teks, start, n)',desc:'Ambil karakter dari kiri, kanan, atau tengah teks.',contoh:'=LEFT(A1,3) → 3 karakter pertama',tips:'=MID(A1,5,4) → ambil 4 karakter mulai posisi ke-5.'},
+    {cat:'Teks',icon:'✍️',name:'LEN',syntax:'=LEN(teks)',desc:'Hitung panjang teks (jumlah karakter).',contoh:'=LEN(A1)',tips:'Berguna untuk validasi: =IF(LEN(A1)>10,"Terlalu panjang","OK")'},
+    {cat:'Teks',icon:'✍️',name:'FIND / SEARCH',syntax:'=FIND(cari, teks) / =SEARCH(cari, teks)',desc:'Temukan posisi teks dalam string. FIND case-sensitive, SEARCH tidak.',contoh:'=SEARCH("@",A1) → posisi @ dalam email',tips:'Kombinasikan dengan MID untuk ekstrak bagian tertentu.'},
+    {cat:'Teks',icon:'✍️',name:'SUBSTITUTE',syntax:'=SUBSTITUTE(teks, lama, baru)',desc:'Ganti teks tertentu dalam string.',contoh:'=SUBSTITUTE(A1,"-","") → hapus semua tanda hubung',tips:'Tambah argumen ke-4 untuk ganti kejadian ke-N saja.'},
+    {cat:'Teks',icon:'✍️',name:'TRIM',syntax:'=TRIM(teks)',desc:'Hapus spasi berlebih di awal, akhir, dan tengah teks.',contoh:'=TRIM(A1)',tips:'Kombinasikan dengan CLEAN untuk hapus karakter non-printable.'},
+    {cat:'Teks',icon:'✍️',name:'UPPER / LOWER / PROPER',syntax:'=UPPER(teks) / =LOWER(teks) / =PROPER(teks)',desc:'Ubah teks jadi huruf besar, kecil, atau kapital tiap kata.',contoh:'=PROPER(A1) → "budi santoso" → "Budi Santoso"',tips:''},
+    {cat:'Teks',icon:'✍️',name:'TEXT',syntax:'=TEXT(angka, format)',desc:'Format angka menjadi teks dengan format tertentu.',contoh:'=TEXT(A1,"#,##0") → 1500000 jadi "1,500,000"',tips:'=TEXT(TODAY(),"DD MMMM YYYY") → tanggal dalam format panjang.'},
+    {cat:'Teks',icon:'✍️',name:'VALUE',syntax:'=VALUE(teks)',desc:'Konversi teks yang berisi angka menjadi angka.',contoh:'=VALUE(TRIM(A1))',tips:'Berguna ketika angka dari import CSV terbaca sebagai teks.'},
+    {cat:'Teks',icon:'✍️',name:'REPT',syntax:'=REPT(teks, jumlah)',desc:'Ulang teks sebanyak N kali.',contoh:'=REPT("★",A1) → buat rating bintang visual',tips:''},
+    {cat:'Teks',icon:'✍️',name:'CHAR / CODE',syntax:'=CHAR(angka) / =CODE(teks)',desc:'Konversi kode ASCII ke karakter dan sebaliknya.',contoh:'=CHAR(10) → line break dalam sel',tips:'Gunakan =CHAR(10) dalam CONCATENATE dengan Alt+Enter.'},
+
+    // ── LOOKUP & REFERENSI ──────────────────────────────────
+    {cat:'Lookup',icon:'🔎',name:'VLOOKUP',syntax:'=VLOOKUP(nilai, tabel, kolom_ke, [exact])',desc:'Cari nilai di kolom pertama tabel, return nilai di kolom yang ditentukan.',contoh:'=VLOOKUP(A2,Sheet2!A:C,2,0)',tips:'Pakai 0 atau FALSE untuk exact match. Kolom ke-1 = kolom pencarian.'},
+    {cat:'Lookup',icon:'🔎',name:'HLOOKUP',syntax:'=HLOOKUP(nilai, tabel, baris_ke, [exact])',desc:'Seperti VLOOKUP tapi horizontal (cari di baris pertama).',contoh:'=HLOOKUP(A1,B1:Z3,2,0)',tips:''},
+    {cat:'Lookup',icon:'🔎',name:'INDEX + MATCH',syntax:'=INDEX(return_range, MATCH(nilai, lookup_range, 0))',desc:'Kombinasi fleksibel — lebih powerful dari VLOOKUP, bisa cari ke kiri.',contoh:'=INDEX(A:A,MATCH(D1,B:B,0))',tips:'Lebih cepat dari VLOOKUP untuk dataset besar.'},
+    {cat:'Lookup',icon:'🔎',name:'XLOOKUP',syntax:'=XLOOKUP(nilai, lookup_array, return_array, [jika_gagal])',desc:'Versi modern VLOOKUP — lebih fleksibel, bisa cari semua arah.',contoh:'=XLOOKUP(A2,B:B,C:C,"Tidak ditemukan")',tips:'Excel 365/2021+. Bisa return beberapa kolom sekaligus.'},
+    {cat:'Lookup',icon:'🔎',name:'MATCH',syntax:'=MATCH(nilai, array, tipe)',desc:'Return posisi/baris nilai dalam array.',contoh:'=MATCH("Jakarta",A:A,0)',tips:'Tipe 0 = exact, 1 = kurang dari, -1 = lebih dari.'},
+    {cat:'Lookup',icon:'🔎',name:'INDEX',syntax:'=INDEX(array, baris, [kolom])',desc:'Ambil nilai dari posisi tertentu dalam array.',contoh:'=INDEX(A1:D10,3,2) → nilai baris 3 kolom 2',tips:'Bisa return seluruh baris/kolom jika salah satu argumen = 0.'},
+    {cat:'Lookup',icon:'🔎',name:'OFFSET',syntax:'=OFFSET(ref, baris, kolom, [tinggi], [lebar])',desc:'Referensi yang digeser dari titik awal.',contoh:'=OFFSET(A1,2,1) → C3 (geser 2 baris bawah, 1 kolom kanan)',tips:'Berguna untuk membuat range dinamis.'},
+    {cat:'Lookup',icon:'🔎',name:'INDIRECT',syntax:'=INDIRECT(teks_referensi)',desc:'Konversi teks menjadi referensi sel yang valid.',contoh:'=INDIRECT("Sheet"&A1&"!B2") → referensi dinamis ke sheet berbeda',tips:'Berguna untuk membuat referensi antar sheet secara dinamis.'},
+    {cat:'Lookup',icon:'🔎',name:'CHOOSE',syntax:'=CHOOSE(index, val1, val2, ...)',desc:'Pilih nilai berdasarkan nomor index.',contoh:'=CHOOSE(A1,"Senin","Selasa","Rabu","Kamis","Jumat")',tips:''},
+
+    // ── LOGIKA ─────────────────────────────────────────────
+    {cat:'Logika',icon:'🧠',name:'IF',syntax:'=IF(kondisi, jika_benar, jika_salah)',desc:'Kembalikan nilai berbeda berdasarkan kondisi.',contoh:'=IF(A1>=70,"Lulus","Tidak Lulus")',tips:'Bisa di-nest hingga 64 tingkat: =IF(A1>90,"A",IF(A1>80,"B","C"))'},
+    {cat:'Logika',icon:'🧠',name:'IFS',syntax:'=IFS(kondisi1, hasil1, kondisi2, hasil2, ...)',desc:'Periksa beberapa kondisi tanpa nested IF.',contoh:'=IFS(A1>=90,"A",A1>=80,"B",A1>=70,"C",TRUE,"D")',tips:'Excel 2019+. TRUE sebagai kondisi terakhir = "otherwise".'},
+    {cat:'Logika',icon:'🧠',name:'AND / OR / NOT',syntax:'=AND(kondisi1, kondisi2) / =OR(...) / =NOT(...)',desc:'Logika gabungan — AND: semua harus benar, OR: salah satu cukup.',contoh:'=IF(AND(A1>0,B1="Aktif"),"Valid","Invalid")',tips:''},
+    {cat:'Logika',icon:'🧠',name:'IFERROR',syntax:'=IFERROR(rumus, jika_error)',desc:'Tangani error dan ganti dengan nilai lain.',contoh:'=IFERROR(VLOOKUP(A1,B:C,2,0),"Tidak Ditemukan")',tips:'Berguna untuk sembunyikan #N/A, #DIV/0!, dll.'},
+    {cat:'Logika',icon:'🧠',name:'IFNA',syntax:'=IFNA(rumus, jika_NA)',desc:'Khusus menangani error #N/A saja.',contoh:'=IFNA(VLOOKUP(A1,B:C,2,0),"-")',tips:'Lebih spesifik dari IFERROR — hanya tangani #N/A.'},
+    {cat:'Logika',icon:'🧠',name:'SWITCH',syntax:'=SWITCH(ekspresi, val1, hasil1, val2, hasil2, ..., default)',desc:'Bandingkan satu nilai terhadap banyak kemungkinan.',contoh:'=SWITCH(A1,1,"Satu",2,"Dua",3,"Tiga","Lainnya")',tips:'Excel 2019+. Lebih bersih dari nested IF untuk kasus ini.'},
+    {cat:'Logika',icon:'🧠',name:'ISBLANK / ISNUMBER / ISTEXT',syntax:'=ISBLANK(A1) / =ISNUMBER(A1) / =ISTEXT(A1)',desc:'Cek tipe atau kondisi isi sel.',contoh:'=IF(ISBLANK(A1),"Kosong","Ada data")',tips:'Tersedia juga: ISERROR, ISNA, ISLOGICAL, dll.'},
+
+    // ── TANGGAL & WAKTU ─────────────────────────────────────
+    {cat:'Tanggal',icon:'📅',name:'TODAY / NOW',syntax:'=TODAY() / =NOW()',desc:'Tanggal hari ini / tanggal + waktu sekarang.',contoh:'=TODAY()',tips:'TODAY() statis dalam perhitungan, NOW() update setiap kalkulasi.'},
+    {cat:'Tanggal',icon:'📅',name:'DATE',syntax:'=DATE(tahun, bulan, hari)',desc:'Buat nilai tanggal dari komponen terpisah.',contoh:'=DATE(2025,1,15) → 15 Jan 2025',tips:'Berguna untuk buat tanggal dari data terpisah di kolom berbeda.'},
+    {cat:'Tanggal',icon:'📅',name:'DATEDIF',syntax:'=DATEDIF(tgl_mulai, tgl_akhir, satuan)',desc:'Hitung selisih dua tanggal dalam satuan tertentu.',contoh:'=DATEDIF(A1,TODAY(),"Y") → umur dalam tahun',tips:'Satuan: "Y"=tahun, "M"=bulan, "D"=hari, "YM"=sisa bulan.'},
+    {cat:'Tanggal',icon:'📅',name:'EDATE / EOMONTH',syntax:'=EDATE(tgl, bulan) / =EOMONTH(tgl, bulan)',desc:'EDATE: tambah/kurangi bulan. EOMONTH: hari terakhir bulan.',contoh:'=EDATE(A1,3) → 3 bulan setelah tanggal A1',tips:'=EOMONTH(TODAY(),0) → hari terakhir bulan ini.'},
+    {cat:'Tanggal',icon:'📅',name:'YEAR / MONTH / DAY',syntax:'=YEAR(tgl) / =MONTH(tgl) / =DAY(tgl)',desc:'Ekstrak komponen dari tanggal.',contoh:'=YEAR(A1)&"-"&TEXT(MONTH(A1),"00")&"-"&TEXT(DAY(A1),"00")',tips:''},
+    {cat:'Tanggal',icon:'📅',name:'WEEKDAY',syntax:'=WEEKDAY(tgl, return_type)',desc:'Nomor hari dalam seminggu dari sebuah tanggal.',contoh:'=WEEKDAY(A1,2) → 1=Sen, 7=Min (return_type 2)',tips:'Berguna untuk filter/highlight hari libur.'},
+    {cat:'Tanggal',icon:'📅',name:'NETWORKDAYS',syntax:'=NETWORKDAYS(tgl_mulai, tgl_akhir, [hari_libur])',desc:'Hitung hari kerja antara dua tanggal (exclude Sabtu-Minggu).',contoh:'=NETWORKDAYS(A1,B1)',tips:'Tambah range hari libur nasional sebagai argumen ke-3.'},
+    {cat:'Tanggal',icon:'📅',name:'WORKDAY',syntax:'=WORKDAY(tgl_mulai, hari, [hari_libur])',desc:'Hitung tanggal N hari kerja dari suatu tanggal.',contoh:'=WORKDAY(TODAY(),30) → 30 hari kerja dari sekarang',tips:''},
+
+    // ── FINANSIAL ───────────────────────────────────────────
+    {cat:'Finansial',icon:'💰',name:'PMT',syntax:'=PMT(rate, nper, pv)',desc:'Hitung cicilan pinjaman per periode.',contoh:'=PMT(6%/12, 36, -50000000) → cicilan KPR per bulan',tips:'Rate = bunga per periode. Bagi dengan 12 untuk bunga tahunan.'},
+    {cat:'Finansial',icon:'💰',name:'PV / FV',syntax:'=PV(rate, nper, pmt) / =FV(rate, nper, pmt)',desc:'Present Value / Future Value — nilai sekarang atau masa depan.',contoh:'=FV(8%/12,24,-500000,0) → nilai investasi 2 tahun',tips:''},
+    {cat:'Finansial',icon:'💰',name:'NPV',syntax:'=NPV(rate, value1, value2, ...)',desc:'Net Present Value dari arus kas.',contoh:'=NPV(10%,B2:B6)-B1',tips:'Kurangi investasi awal (B1) karena NPV mulai dari periode 1.'},
+    {cat:'Finansial',icon:'💰',name:'IRR',syntax:'=IRR(values, [tebakan])',desc:'Internal Rate of Return dari serangkaian arus kas.',contoh:'=IRR(B1:B6)',tips:'B1 harus negatif (investasi awal), B2:B6 positif (return).'},
+
+    // ── ARRAY & DINAMIS ─────────────────────────────────────
+    {cat:'Array',icon:'⚡',name:'FILTER',syntax:'=FILTER(array, include, [jika_kosong])',desc:'Filter data berdasarkan kondisi — hasil otomatis melebar (spill).',contoh:'=FILTER(A2:C100,B2:B100="Jakarta","Tidak ada data")',tips:'Excel 365+. Bisa pakai multiple kondisi dengan * (AND) atau + (OR).'},
+    {cat:'Array',icon:'⚡',name:'SORT / SORTBY',syntax:'=SORT(array, [kolom], [order]) / =SORTBY(array, by_array)',desc:'Urutkan data secara dinamis tanpa mengubah data asli.',contoh:'=SORT(A2:B100,2,-1) → urutkan kolom 2 dari besar ke kecil',tips:'Excel 365+. SORTBY lebih fleksibel untuk multi-kolom.'},
+    {cat:'Array',icon:'⚡',name:'UNIQUE',syntax:'=UNIQUE(array, [by_col], [exact_once])',desc:'Ekstrak nilai unik dari array secara dinamis.',contoh:'=UNIQUE(A2:A100)',tips:'Excel 365+. Kombinasikan dengan SORT untuk daftar unik yang terurut.'},
+    {cat:'Array',icon:'⚡',name:'SEQUENCE',syntax:'=SEQUENCE(baris, [kolom], [mulai], [langkah])',desc:'Buat urutan angka secara otomatis.',contoh:'=SEQUENCE(10) → angka 1-10\n=SEQUENCE(5,1,0,2) → 0,2,4,6,8',tips:'Excel 365+. Berguna untuk buat nomor urut dinamis.'},
+    {cat:'Array',icon:'⚡',name:'TRANSPOSE',syntax:'=TRANSPOSE(array)',desc:'Ubah baris menjadi kolom dan sebaliknya.',contoh:'=TRANSPOSE(A1:D4)',tips:'Di Excel 365, cukup ketik biasa. Di versi lama, tekan Ctrl+Shift+Enter.'},
+    {cat:'Array',icon:'⚡',name:'SUMPRODUCT',syntax:'=SUMPRODUCT(array1, array2, ...)',desc:'Kalikan array lalu jumlahkan. Bisa ganti SUMIFS untuk perhitungan kompleks.',contoh:'=SUMPRODUCT((A2:A100="Jakarta")*(B2:B100>50000)*C2:C100)',tips:'Sangat powerful untuk conditional sum/count dengan array.'},
+
+    // ── INFORMASI & LAINNYA ─────────────────────────────────
+    {cat:'Lainnya',icon:'ℹ️',name:'ROW / COLUMN',syntax:'=ROW([ref]) / =COLUMN([ref])',desc:'Nomor baris / kolom dari sel referensi.',contoh:'=ROW()-1 → nomor urut otomatis mulai dari 1',tips:''},
+    {cat:'Lainnya',icon:'ℹ️',name:'ROWS / COLUMNS',syntax:'=ROWS(array) / =COLUMNS(array)',desc:'Hitung jumlah baris / kolom dalam range.',contoh:'=ROWS(A2:A100) → 99',tips:''},
+    {cat:'Lainnya',icon:'ℹ️',name:'ISNUMBER dalam SEARCH',syntax:'=ISNUMBER(SEARCH(cari, teks))',desc:'Cek apakah teks mengandung kata tertentu (case-insensitive).',contoh:'=IF(ISNUMBER(SEARCH("jakarta",A1)),"Ada","Tidak")',tips:'Gunakan FIND (bukan SEARCH) jika butuh case-sensitive.'},
+    {cat:'Lainnya',icon:'ℹ️',name:'Nomor Urut Otomatis',syntax:'=ROW()-ROW($A$1)',desc:'Nomor urut yang otomatis menyesuaikan saat baris ditambah/dihapus.',contoh:'=ROW()-1 (jika header di baris 1)',tips:''},
+    {cat:'Lainnya',icon:'ℹ️',name:'Persentase Perubahan',syntax:'=(nilai_baru - nilai_lama) / ABS(nilai_lama)',desc:'Hitung persentase kenaikan atau penurunan.',contoh:'=(B2-A2)/ABS(A2)*100 → persentase pertumbuhan',tips:'Format sel sebagai Percentage untuk tampil % otomatis.'},
+    {cat:'Lainnya',icon:'ℹ️',name:'Highlight Duplikat (CF)',syntax:'=COUNTIF($A$1:$A$100,A1)>1',desc:'Rumus untuk Conditional Formatting — highlight sel yang duplikat.',contoh:'Masuk ke Conditional Formatting → New Rule → Use Formula',tips:'Pilih seluruh range dulu sebelum buat rule.'},
+    {cat:'Lainnya',icon:'ℹ️',name:'Ranking Tanpa Duplikat',syntax:'=SUMPRODUCT((B$2:B$100>B2)/COUNTIF(B$2:B$100,B$2:B$100))+1',desc:'Ranking yang tidak ada nomor kembar meskipun nilai sama.',contoh:'Masukkan di kolom peringkat lalu tarik ke bawah.',tips:''},
   ];
-  $('fm-chips').innerHTML=chips.map(c=>`<button onclick="fmChip(this)" style="padding:6px 12px;border:1px solid var(--border2);border-radius:100px;background:white;font-family:'Outfit',sans-serif;font-size:11px;color:var(--ink3);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--c6)';this.style.color='var(--c6)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--ink3)'">${esc(c)}</button>`).join('');
 
-  window.fmChip=function(el){$('fm-input').value=el.textContent;$('fm-input').focus();};
+  const CATS=['Semua',...[...new Set(DB.map(f=>f.cat))]];
+  const CAT_CLR={'Matematika':'--c1','Teks':'--c2','Lookup':'--c5','Logika':'--c3','Tanggal':'--c4','Finansial':'--c7','Array':'--c6','Lainnya':'--c3'};
 
-  window.fmGenerate=async function(){
-    const q=$('fm-input').value.trim();
-    if(!q){toast('⚠️','Deskripikan dulu apa yang lo mau!');return;}
-    $('fm-result').classList.remove('on');
-    $('fm-spin').classList.add('on');
-    $('fm-btn').disabled=true;
-    try{
-      const res=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:1000,
-          system:`Kamu adalah ahli Excel. User akan mendeskripsikan kebutuhan dalam bahasa Indonesia, dan kamu harus memberikan rumus Excel yang tepat.
+  let activeCat='Semua';
 
-Balas HANYA dengan format JSON berikut (tanpa markdown, tanpa penjelasan lain):
-{"formula":"=RUMUS_EXCEL_DISINI","explanation":"Penjelasan singkat cara kerja rumus ini dalam 1-2 kalimat bahasa Indonesia.","tips":"Tips tambahan atau alternatif (opsional, bisa string kosong)"}`,
-          messages:[{role:'user',content:q}]
-        })
-      });
-      const data=await res.json();
-      const text=data.content?.find(c=>c.type==='text')?.text||'';
-      let parsed;
-      try{parsed=JSON.parse(text.replace(/```json|```/g,'').trim());}
-      catch{parsed={formula:text,explanation:'',tips:''};}
-      $('fm-formula').textContent=parsed.formula;
-      $('fm-explain').textContent=(parsed.explanation||'')+(parsed.tips?'\n\n💡 '+parsed.tips:'');
-      $('fm-result').classList.add('on');
-      // add to history
-      history.unshift({q,formula:parsed.formula,explain:parsed.explanation});
-      if(history.length>10)history.pop();
-      renderHistory();
-      toast('✨','Formula berhasil di-generate!');
-    }catch(e){toast('❌','Gagal generate formula: '+e.message);}
-    finally{$('fm-spin').classList.remove('on');$('fm-btn').disabled=false;}
+  // Render category chips
+  $('fl-cats').innerHTML=CATS.map(c=>`
+    <button onclick="flCat('${c}')" id="flcat-${c.replace(/\s/g,'')}"
+      style="padding:5px 13px;border-radius:100px;border:1.5px solid var(--border2);
+             background:${c==='Semua'?'var(--ink)':'white'};
+             color:${c==='Semua'?'white':'var(--ink3)'};
+             font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;
+             cursor:pointer;transition:all .18s;white-space:nowrap;"
+      onmouseover="if(this.dataset.active!=='1'){this.style.borderColor='var(--ink)';this.style.color='var(--ink)';}"
+      onmouseout="if(this.dataset.active!=='1'){this.style.borderColor='var(--border2)';this.style.color='var(--ink3)';}"
+      data-active="${c==='Semua'?'1':''}">${c}</button>`).join('');
+
+  window.flCat=function(cat){
+    activeCat=cat;
+    document.querySelectorAll('[id^="flcat-"]').forEach(b=>{
+      const isActive=b.textContent.trim()===cat;
+      b.style.background=isActive?'var(--ink)':'white';
+      b.style.color=isActive?'white':'var(--ink3)';
+      b.style.borderColor=isActive?'var(--ink)':'var(--border2)';
+      b.dataset.active=isActive?'1':'';
+    });
+    flFilter();
   };
 
-  window.fmCopy=function(){const f=$('fm-formula').textContent;navigator.clipboard.writeText(f).then(()=>toast('📋','Formula disalin!')).catch(()=>{const ta=document.createElement('textarea');ta.value=f;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋','Formula disalin!');});};
+  window.flFilter=function(){
+    const q=($('fl-search').value||'').toLowerCase().trim();
+    const filtered=DB.filter(f=>{
+      const matchCat=activeCat==='Semua'||f.cat===activeCat;
+      const matchQ=!q||
+        f.name.toLowerCase().includes(q)||
+        f.desc.toLowerCase().includes(q)||
+        f.syntax.toLowerCase().includes(q)||
+        f.contoh.toLowerCase().includes(q)||
+        (f.tips||'').toLowerCase().includes(q)||
+        f.cat.toLowerCase().includes(q);
+      return matchCat&&matchQ;
+    });
 
-  function renderHistory(){
-    if(!history.length){$('fm-history').innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0;">Belum ada riwayat.</div>';return;}
-    $('fm-history').innerHTML=history.map((h,i)=>`
-      <div style="padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onclick="fmFromHistory(${i})">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(h.q)}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--c6);font-weight:500;">${esc(h.formula)}</div>
-      </div>`).join('');
-  }
-  window.fmFromHistory=function(i){const h=history[i];$('fm-formula').textContent=h.formula;$('fm-explain').textContent=h.explain;$('fm-result').classList.add('on');$('fm-input').value=h.q;window.scrollTo({top:0,behavior:'smooth'});};
+    $('fl-count').textContent=`${filtered.length} rumus ditemukan`;
 
-  // init
-  renderHistory();
+    if(!filtered.length){
+      $('fl-grid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);font-size:14px;">Tidak ada rumus yang cocok dengan pencarian "<strong>${esc(q)}</strong>"</div>`;
+      return;
+    }
+
+    $('fl-grid').innerHTML=filtered.map((f,i)=>{
+      const clrVar=CAT_CLR[f.cat]||'--c5';
+      const clr=`var(${clrVar})`;
+      const clrL=`var(${clrVar.replace('--c','--c').replace(/(\d+)$/,m=>m+'l')})`;
+      return `
+      <div style="background:white;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--sh);transition:all .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--sh2)'" onmouseout="this.style.transform='';this.style.boxShadow='var(--sh)'">
+        <div style="height:3px;background:${clr};"></div>
+        <div style="padding:16px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:18px;">${f.icon}</span>
+            <span style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.01em;">${esc(f.name)}</span>
+            <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 9px;border-radius:100px;background:${clrL};color:${clr};border:1px solid ${clr};opacity:.8;">${f.cat}</span>
+          </div>
+          <div style="font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:10px;">${esc(f.desc)}</div>
+          <div style="background:var(--bg);border-radius:8px;padding:9px 12px;margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2);word-break:break-all;cursor:pointer;transition:background .15s;position:relative;" onclick="flCopy('${esc(f.syntax).replace(/'/g,"\\'")}',this)" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--bg)'">
+            <span>${esc(f.syntax)}</span>
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--muted);">copy</span>
+          </div>
+          ${f.contoh?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px;"><span style="font-family:'JetBrains Mono',monospace;color:${clr};font-size:10px;">Contoh: </span>${esc(f.contoh)}</div>`:''}
+          ${f.tips?`<div style="font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:8px;margin-top:8px;">💡 ${esc(f.tips)}</div>`:''}
+          <div style="display:flex;gap:6px;margin-top:12px;">
+            <button onclick="flCopy('${esc(f.syntax).replace(/'/g,"\\'")}',this)" style="flex:1;padding:8px;background:${clr};color:white;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Copy Syntax</button>
+            ${f.contoh?`<button onclick="flCopy('${esc(f.contoh.split('\\n')[0]).replace(/'/g,"\\'")}',this)" style="padding:8px 14px;background:white;color:var(--ink3);border:1.5px solid var(--border2);border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='var(--ink)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--ink3)'">Copy Contoh</button>`:''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  };
+
+  window.flCopy=function(text, btn){
+    const clean=text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+    navigator.clipboard.writeText(clean).then(()=>toast('📋','Formula disalin!')).catch(()=>{
+      const ta=document.createElement('textarea');ta.value=clean;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋','Formula disalin!');
+    });
+  };
+
+  // Initial render
+  flFilter();
 })();
 
 /* ══════════════════════════════════════════════════════════
