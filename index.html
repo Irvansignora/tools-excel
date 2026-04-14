@@ -897,39 +897,161 @@ function nav(id, el) {
     let hd=false;for(let i=0;i<e.dataTransfer.items.length;i++){const en=e.dataTransfer.items[i].webkitGetAsEntry?.();if(en?.isDirectory){hd=true;break;}}
     if(hd){cvM('folder');await foldDrop(e.dataTransfer.items);}else hndFiles(e.dataTransfer.files);
   });
-  inp.addEventListener('change',e=>hndFiles(e.target.files));
-  finp.addEventListener('change',e=>foldUp(e.target.files));
+  inp.addEventListener('change',e=>{hndFiles(e.target.files);inp.value='';});
+  finp.addEventListener('change',e=>{foldUp(e.target.files);finp.value='';});
 
   window.cvM=function(m){
     mode=m;$('cv-fm').classList.toggle('on',m==='file');$('cv-flm').classList.toggle('on',m==='folder');
-    if(m==='file'){$('cv-di').textContent='📄';$('cv-dt').textContent='Drag & drop atau klik untuk upload';$('cv-ds').textContent='Support: .xlsx · .csv';$('cv-foli').style.display='none';}
-    else{$('cv-di').textContent='📁';$('cv-dt').textContent='Drop folder di sini atau klik untuk pilih folder';$('cv-ds').textContent='Akan memproses semua .xlsx dan .csv dalam folder';}
+    const cnt=files.length;
+    if(m==='file'){$('cv-di').textContent='📄';$('cv-dt').textContent=cnt?cnt.toLocaleString('id')+' file dipilih \u2014 klik/drop untuk tambah':'Drag & drop atau klik untuk upload';$('cv-ds').textContent='Support: .xlsx \u00b7 .csv \u2014 bisa pilih banyak sekaligus';if(!cnt)$('cv-foli').style.display='none';}
+    else{$('cv-di').textContent='\uD83D\uDCC1';$('cv-dt').textContent=cnt?cnt.toLocaleString('id')+' file dipilih \u2014 drop lagi untuk tambah':'Drop folder di sini atau klik untuk pilih folder';$('cv-ds').textContent='Akan memproses semua .xlsx dan .csv dalam folder';}
   };
-  async function foldDrop(items){files=[];folStr={};for(let i=0;i<items.length;i++){const en=items[i].webkitGetAsEntry?.();if(en?.isDirectory)await travDir(en,'');}updFol();updBtn();}
-  function foldUp(fl){files=[];folStr={};Array.from(fl).forEach(f=>{if(/\.(xlsx|csv)$/i.test(f.name)){const p=f.webkitRelativePath||f.name,folder=p.split('/').slice(0,-1).join('/');if(!folStr[folder])folStr[folder]=[];folStr[folder].push(f);files.push(f);}});updFol();updBtn();}
-  async function travDir(dir,path){const reader=dir.createReader();const entries=await new Promise(res=>reader.readEntries(res));for(const en of entries){const full=path?path+'/'+en.name:en.name;if(en.isDirectory)await travDir(en,full);else if(/\.(xlsx|csv)$/i.test(en.name)){const file=await new Promise(res=>en.file(res));if(!folStr[path])folStr[path]=[];folStr[path].push(file);files.push(file);}}}
-  function updFol(){$('cv-foli').style.display='block';const k=Object.keys(folStr);$('cv-foln').textContent='📁 '+(k[0]||'Root');$('cv-n1').textContent=files.length;$('cv-n2').textContent=files.filter(f=>f.name.endsWith('.xlsx')).length;$('cv-n3').textContent=files.filter(f=>f.name.endsWith('.csv')).length;$('cv-n4').textContent=fmts(files.reduce((s,f)=>s+f.size,0));}
-  function hndFiles(fl){files=Array.from(fl);rendList();updBtn();}
-  function rendList(){const el=$('cv-fl');if(!files.length){el.classList.remove('on');return;}el.classList.add('on');el.innerHTML=files.map((f,i)=>`<div class="fitem"><span class="fitem-n">${esc(f.name)}</span><span class="fitem-s">${fmts(f.size)}</span><button class="fitem-rm" onclick="cvRm(${i})">✕</button></div>`).join('');}
+  async function foldDrop(items){
+    const newFiles=[];const newFol={};
+    for(let i=0;i<items.length;i++){const en=items[i].webkitGetAsEntry?.();if(en?.isDirectory)await travDir(en,'',newFiles,newFol);}
+    const existing=new Set(files.map(f=>f.name+'|'+f.size));
+    const added=newFiles.filter(f=>!existing.has(f.name+'|'+f.size));
+    files.push(...added);Object.assign(folStr,newFol);
+    updFol();updBtn();
+  }
+  function foldUp(fl){
+    const incoming=Array.from(fl).filter(f=>/\.(xlsx|csv)$/i.test(f.name));
+    const existing=new Set(files.map(f=>f.name+'|'+f.size));
+    incoming.forEach(f=>{
+      if(!existing.has(f.name+'|'+f.size)){
+        const p=f.webkitRelativePath||f.name,folder=p.split('/').slice(0,-1).join('/');
+        if(!folStr[folder])folStr[folder]=[];folStr[folder].push(f);files.push(f);
+      }
+    });
+    updFol();updBtn();
+  }
+  async function travDir(dir,path,outFiles,outFol){
+    const reader=dir.createReader();
+    // readEntries only returns up to 100 entries at a time — loop until done
+    let entries=[];
+    while(true){
+      const batch=await new Promise(res=>reader.readEntries(res));
+      if(!batch.length)break;
+      entries.push(...batch);
+    }
+    for(const en of entries){
+      const full=path?path+'/'+en.name:en.name;
+      if(en.isDirectory)await travDir(en,full,outFiles,outFol);
+      else if(/\.(xlsx|csv)$/i.test(en.name)){
+        const file=await new Promise(res=>en.file(res));
+        if(!outFol[path])outFol[path]=[];outFol[path].push(file);outFiles.push(file);
+      }
+    }
+  }
+  function updFol(){
+    $('cv-foli').style.display=files.length?'block':'none';
+    const k=Object.keys(folStr);
+    $('cv-foln').textContent=(k.length?'📁 '+(k[0]||'Root')+(k.length>1?' (+'+(k.length-1)+' folder)':''):'📄 '+files.length.toLocaleString('id')+' file');
+    $('cv-n1').textContent=files.length.toLocaleString('id');
+    $('cv-n2').textContent=files.filter(f=>/\.xlsx$/i.test(f.name)).length.toLocaleString('id');
+    $('cv-n3').textContent=files.filter(f=>/\.csv$/i.test(f.name)).length.toLocaleString('id');
+    $('cv-n4').textContent=fmts(files.reduce((s,f)=>s+f.size,0));
+    const cnt=files.length;
+    if(mode==='folder') $('cv-dt').textContent=cnt?cnt.toLocaleString('id')+' file dipilih — drop lagi untuk tambah':'Drop folder di sini atau klik untuk pilih folder';
+    else $('cv-dt').textContent=cnt?cnt.toLocaleString('id')+' file dipilih — klik/drop untuk tambah':'Drag & drop atau klik untuk upload';
+  }
+  // ── Merge new files, skip duplicates by name+size ──
+  function hndFiles(fl){
+    const incoming=Array.from(fl).filter(f=>/\.(xlsx|csv)$/i.test(f.name));
+    const existing=new Set(files.map(f=>f.name+'|'+f.size));
+    const added=incoming.filter(f=>!existing.has(f.name+'|'+f.size));
+    files.push(...added);
+    rendList();updFol();updBtn();
+    if(added.length<incoming.length)toast('ℹ️',`${incoming.length-added.length} file duplikat diabaikan`);
+  }
+
+  const CV_PREVIEW_MAX=80; // max items shown in list DOM
+  function rendList(){
+    const el=$('cv-fl');
+    if(!files.length){el.classList.remove('on');el.innerHTML='';return;}
+    el.classList.add('on');
+    const shown=files.slice(0,CV_PREVIEW_MAX);
+    const hidden=files.length-shown.length;
+    el.innerHTML=shown.map((f,i)=>`<div class="fitem"><span class="fitem-n" title="${esc(f.name)}">${esc(f.name)}</span><span class="fitem-s">${fmts(f.size)}</span><button class="fitem-rm" onclick="cvRm(${i})">✕</button></div>`).join('')
+      +(hidden>0?`<div class="fitem" style="justify-content:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;">+${hidden.toLocaleString('id')} file lainnya tidak ditampilkan</div>`:'')
+      +`<div style="margin-top:8px;display:flex;gap:6px;"><button class="btn bgh" style="flex:1;font-size:11px;padding:7px;" onclick="cvClearAll()">🗑 Hapus Semua</button></div>`;
+  }
   window.cvRm=function(i){files.splice(i,1);rendList();updBtn();};
+  window.cvClearAll=function(){files=[];folStr={};$('cv-foli').style.display='none';rendList();updBtn();cvStat('idle','Upload file dulu untuk mulai');};
   function updBtn(){$('cv-btn').disabled=!files.length;if(files.length)cvStat('idle',`${files.length} file siap diproses`);}
   function cvStat(t,m){$('cv-st').className='stbar '+t;$('cv-stx').textContent=m;}
   function cvProg(pct,lbl){$('cv-pf').style.width=pct+'%';$('cv-pp').textContent=pct+'%';if(lbl)$('cv-pl').textContent=lbl;}
   function cvShowP(s){$('cv-pw').classList.toggle('on',s);if(!s)cvProg(0,'Memproses...');}
+
+  // Yield to browser every N files to prevent UI freeze
+  async function yieldEach(arr, batchSize, fn, onProgress){
+    let done=0;
+    for(let i=0;i<arr.length;i+=batchSize){
+      const batch=arr.slice(i,i+batchSize);
+      for(const item of batch) await fn(item,done++);
+      onProgress&&onProgress(done,arr.length);
+      await new Promise(r=>setTimeout(r,0)); // yield
+    }
+  }
+
   window.cvProc=async function(){
     const o1=$('cv-o1').checked,o2=$('cv-o2').checked,o3=$('cv-o3').checked,o4=$('cv-o4').checked;
     if(!o1&&!o2&&!o3&&!o4){toast('⚠️','Pilih minimal satu operasi!');return;}
     const out=$('cv-on').value||'combined_file',btn=$('cv-btn');
     btn.disabled=true;cvShowP(true);cvStat('processing','Memproses...');
-    const tot=[o1,o2,o3,o4].filter(Boolean).length;let step=0;
+    const ops=[o1,o2,o3,o4].filter(Boolean).length;let step=0;
+    const baseP=()=>Math.round((step/ops)*100);
     try{
-      if(o1){cvProg(Math.round((step/tot)*100),'XLSX → CSV...');for(const f of files.filter(f=>f.name.endsWith('.xlsx'))){const d=await f.arrayBuffer(),wb=XLSX.read(d,{type:'array'}),csv=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);dlBlob(new Blob([csv],{type:'text/csv'}),f.name.replace('.xlsx','.csv'));}step++;}
-      if(o2){cvProg(Math.round((step/tot)*100),'CSV → XLSX...');for(const f of files.filter(f=>f.name.endsWith('.csv'))){const t=await f.text(),nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.csv_to_sheet(t),'Sheet1');dlBlob(xblob(nb),f.name.replace('.csv','.xlsx'));}step++;}
-      if(o3){cvProg(Math.round((step/tot)*100),'Gabung XLSX...');const xl=files.filter(f=>f.name.endsWith('.xlsx'));if(!xl.length)throw new Error('Tidak ada .xlsx!');const combined=[];let first=true;for(const f of xl){const d=await f.arrayBuffer(),wb=XLSX.read(d,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});if(first){combined.push(...rows);first=false;}else combined.push(...rows.slice(1));}const nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.aoa_to_sheet(combined),'Combined');dlBlob(xblob(nb),out+'.xlsx');step++;}
-      if(o4){cvProg(Math.round((step/tot)*100),'Gabung CSV...');const cf=files.filter(f=>f.name.endsWith('.csv'));if(!cf.length)throw new Error('Tidak ada .csv!');let combined='',first=true;for(const f of cf){const t=await f.text();if(first){combined+=t;first=false;}else combined+='\n'+t.split('\n').slice(1).join('\n');}dlBlob(new Blob([combined],{type:'text/csv'}),out+'.csv');const nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.csv_to_sheet(combined),'Combined');dlBlob(xblob(nb),out+'.xlsx');step++;}
-      cvProg(100,'Selesai!');cvStat('success','Semua proses selesai!');toast('🎉','Proses selesai!');
+      if(o1){
+        const xl=files.filter(f=>/\.xlsx$/i.test(f.name));
+        cvProg(baseP(),`XLSX → CSV (0/${xl.length})...`);
+        await yieldEach(xl,5,async f=>{
+          const d=await f.arrayBuffer(),wb=XLSX.read(d,{type:'array'}),csv=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);
+          dlBlob(new Blob([csv],{type:'text/csv'}),f.name.replace(/\.xlsx$/i,'.csv'));
+        },(done,tot)=>cvProg(baseP()+Math.round((done/tot)*(100/ops)),`XLSX → CSV (${done}/${tot})...`));
+        step++;
+      }
+      if(o2){
+        const cv=files.filter(f=>/\.csv$/i.test(f.name));
+        cvProg(baseP(),`CSV → XLSX (0/${cv.length})...`);
+        await yieldEach(cv,5,async f=>{
+          const t=await f.text(),nb=XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(nb,XLSX.utils.csv_to_sheet(t),'Sheet1');
+          dlBlob(xblob(nb),f.name.replace(/\.csv$/i,'.xlsx'));
+        },(done,tot)=>cvProg(baseP()+Math.round((done/tot)*(100/ops)),`CSV → XLSX (${done}/${tot})...`));
+        step++;
+      }
+      if(o3){
+        const xl=files.filter(f=>/\.xlsx$/i.test(f.name));
+        if(!xl.length)throw new Error('Tidak ada .xlsx!');
+        const combined=[];let first=true;
+        cvProg(baseP(),`Gabung XLSX (0/${xl.length})...`);
+        await yieldEach(xl,3,async f=>{
+          const d=await f.arrayBuffer(),wb=XLSX.read(d,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+          if(first){combined.push(...rows);first=false;}else combined.push(...rows.slice(1));
+        },(done,tot)=>cvProg(baseP()+Math.round((done/tot)*(100/ops)*0.9),`Gabung XLSX (${done}/${tot})...`));
+        cvProg(baseP()+Math.round((100/ops)*0.95),'Menyimpan file gabungan...');
+        const nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.aoa_to_sheet(combined),'Combined');
+        dlBlob(xblob(nb),out+'.xlsx');step++;
+      }
+      if(o4){
+        const cf=files.filter(f=>/\.csv$/i.test(f.name));
+        if(!cf.length)throw new Error('Tidak ada .csv!');
+        const parts=[];let header='';
+        cvProg(baseP(),`Gabung CSV (0/${cf.length})...`);
+        await yieldEach(cf,5,async(f,idx)=>{
+          const t=await f.text();
+          if(idx===0){header=t;parts.push(t);}
+          else parts.push(t.split('\n').slice(1).join('\n'));
+        },(done,tot)=>cvProg(baseP()+Math.round((done/tot)*(100/ops)*0.9),`Gabung CSV (${done}/${tot})...`));
+        const combined=parts.join('\n');
+        dlBlob(new Blob([combined],{type:'text/csv'}),out+'.csv');
+        const nb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nb,XLSX.utils.csv_to_sheet(combined),'Combined');
+        dlBlob(xblob(nb),out+'.xlsx');step++;
+      }
+      cvProg(100,'Selesai!');cvStat('success',`Selesai! ${files.length} file diproses.`);toast('🎉','Proses selesai!');
     }catch(e){cvStat('error','Error: '+e.message);toast('❌',e.message);}
-    finally{btn.disabled=false;setTimeout(()=>cvShowP(false),2000);}
+    finally{btn.disabled=false;setTimeout(()=>cvShowP(false),2500);}
   };
 })();
 
