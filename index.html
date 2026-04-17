@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExcelKit Pro · 7 Tools dalam 1</title>
+<title>ExcelKit Pro · 8 Tools dalam 1</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -31,6 +31,7 @@
   --c5: #1a5f8a;  --c5l: #e4f0f8;  /* ColMapper    – navy */
   --c6: #8b2252;  --c6l: #fae8f0;  /* Formula      – rose */
   --c7: #2e6b5e;  --c7l: #e4f2ef;  /* Formatter    – teal */
+  --c8: #5b4a9e;  --c8l: #eeebfb;  /* TXT Converter – indigo */
 
   --danger:#bf3030;
   --sh:  0 1px 4px rgba(28,18,8,.07);
@@ -120,6 +121,7 @@ body::after{
 .sbt[data-tool="colmap"].active   .sbt-dot{background:var(--c5);}
 .sbt[data-tool="formula"].active  .sbt-dot{background:var(--c6);}
 .sbt[data-tool="formatter"].active .sbt-dot{background:var(--c7);}
+.sbt[data-tool="txtconv"].active  .sbt-dot{background:var(--c8);}
 
 .sbt-num{
   margin-left:auto;
@@ -434,6 +436,21 @@ tr:hover td{background:var(--bg);}
 #p-formatter .slim-pf{background:var(--c7)}
 #p-formatter .btn-main{background:var(--c7);color:white;}
 #p-formatter .btn-main:hover:not(:disabled){background:#1e4d44;box-shadow:0 6px 20px rgba(46,107,94,.3);}
+/* TXT Converter */
+#p-txtconv .ph-tag{color:var(--c8)}
+#p-txtconv .ph-badge{color:var(--c8)}
+#p-txtconv .card-bar{background:var(--c8)}
+#p-txtconv .uzone:hover,#p-txtconv .uzone.drag{border-color:var(--c8);background:var(--c8l);}
+#p-txtconv .dz-ic{background:var(--c8l);border:1.5px solid rgba(91,74,158,.2);}
+#p-txtconv .fbar{background:var(--c8l);border-color:rgba(91,74,158,.25);}
+#p-txtconv .fbar-name{color:var(--c8)}
+#p-txtconv .slim-pf{background:var(--c8)}
+#p-txtconv .btn-main{background:var(--c8);color:white;}
+#p-txtconv .btn-main:hover:not(:disabled){background:#3d2e7a;box-shadow:0 6px 20px rgba(91,74,158,.3);}
+#p-txtconv .sinput:focus{border-color:var(--c8);}
+#p-txtconv .msw .mbtn.on{color:var(--c8);}
+#p-txtconv .tog.on{border-color:var(--c8);}
+#p-txtconv .tog.on::after{background:var(--c8);}
 
 /* RESPONSIVE */
 @media(max-width:700px){
@@ -460,7 +477,7 @@ tr:hover td{background:var(--bg);}
 <aside class="sidebar">
   <div class="sb-brand">
     <div class="sb-wordmark">Excel<em>Kit</em></div>
-    <div class="sb-tagline">7 Tools · All-in-One</div>
+    <div class="sb-tagline">8 Tools · All-in-One</div>
   </div>
 
   <div class="sb-section-lbl">Tools</div>
@@ -472,6 +489,7 @@ tr:hover td{background:var(--bg);}
     <button class="sbt"        data-tool="colmap"    onclick="nav('colmap',this)">   <span class="sbt-dot"></span>🗂️ Column Mapper    <span class="sbt-num">05</span></button>
     <button class="sbt"        data-tool="formula"   onclick="nav('formula',this)">  <span class="sbt-dot"></span>📚 Formula Library  <span class="sbt-num">06</span></button>
     <button class="sbt"        data-tool="formatter" onclick="nav('formatter',this)"><span class="sbt-dot"></span>🎨 Data Formatter   <span class="sbt-num">07</span></button>
+    <button class="sbt"        data-tool="txtconv"   onclick="nav('txtconv',this)">  <span class="sbt-dot"></span>📝 TXT → Excel/CSV  <span class="sbt-num">08</span></button>
   </div>
 
   <div class="sb-footer">Crafted by Irvan_signora</div>
@@ -774,6 +792,164 @@ tr:hover td{background:var(--bg);}
     <div class="prev-h"><div class="prev-t">Preview Data Terformat</div><div class="prev-b" id="ft-pb" style="background:var(--c7l);border:1px solid rgba(46,107,94,.2);color:var(--c7);">— baris</div></div>
     <div class="tw"><table id="ft-pt"></table></div>
     <div class="more" id="ft-mr" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ──────────────── 08 TXT → EXCEL/CSV ──────────────── -->
+<div class="panel" id="p-txtconv">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 08 · TXT Converter</div>
+      <div class="ph-title">TXT → Excel / CSV</div>
+      <div class="ph-desc">Upload file .txt biasa atau laporan ND95 (fixed-width), preview data, lalu download sebagai .xlsx atau .csv. Support multi-file sekaligus.</div>
+    </div>
+    <div class="ph-badge">TXT → XLSX · CSV</div>
+  </div>
+
+  <!-- Upload -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="clabel">Upload File TXT</div>
+    <div class="uzone" id="tc-z">
+      <input type="file" id="tc-i" accept=".txt" multiple>
+      <div class="dz-ic">📝</div>
+      <div class="dz-t">Drag & drop atau klik untuk pilih</div>
+      <div class="dz-s">Support: .txt · Bisa multi-file</div>
+    </div>
+    <div class="flist" id="tc-fl"></div>
+  </div>
+
+  <!-- Mode Selector -->
+  <div class="card" id="tc-mode-card" style="display:none;">
+    <div class="card-bar" style="background:var(--c8);"></div>
+    <div class="clabel">Mode Parsing</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="mbtn on" id="tc-mode-nd95" onclick="tcSetMode('nd95',this)" style="flex:1;padding:14px;border-radius:10px;border:2px solid var(--c8);background:var(--c8l);color:var(--c8);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span style="font-size:22px;">🏢</span>
+        <span>Mode ND95</span>
+        <span style="font-size:10px;font-weight:400;color:var(--ink3);font-family:'JetBrains Mono',monospace;">Laporan fixed-width otomatis</span>
+      </button>
+      <button class="mbtn" id="tc-mode-std" onclick="tcSetMode('standard',this)" style="flex:1;padding:14px;border-radius:10px;border:2px solid var(--border);background:white;color:var(--ink3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span style="font-size:22px;">📋</span>
+        <span>Mode Standard</span>
+        <span style="font-size:10px;font-weight:400;color:var(--muted);font-family:'JetBrains Mono',monospace;">Delimiter: koma, tab, dll</span>
+      </button>
+    </div>
+    <div id="tc-nd95-info" style="margin-top:12px;padding:10px 14px;background:var(--c8l);border:1px solid rgba(91,74,158,.2);border-radius:10px;font-size:12px;color:var(--ink3);line-height:1.6;">
+      ✅ <strong>Mode ND95 aktif</strong> — Parser otomatis mendeteksi kolom fixed-width dari laporan ND95 (Buku Penjualan, Piutang, Mutasi Stock, Pembelian, Retur, dll). Header multi-baris digabung, angka dibersihkan otomatis, baris total dipisahkan.
+    </div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:10px;">
+      <label style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;">Encoding</label>
+      <select class="sinput" id="tc-enc" onchange="tcReloadFiles()" style="max-width:200px;">
+        <option value="windows-1252">Windows-1252 (ANSI) — ND95 Default</option>
+        <option value="utf-8">UTF-8</option>
+        <option value="iso-8859-1">ISO-8859-1 (Latin-1)</option>
+      </select>
+    </div>
+    <div id="tc-nd95-report-type" style="margin-top:10px;display:none;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Jenis Laporan Terdeteksi</div>
+      <div id="tc-nd95-detected" style="font-size:13px;font-weight:600;color:var(--c8);font-family:'Outfit',sans-serif;"></div>
+    </div>
+  </div>
+
+  <!-- Options (Standard mode only) -->
+  <div class="card" id="tc-opts" style="display:none;">
+    <div class="card-bar"></div>
+    <div class="clabel">Konfigurasi Parsing (Standard)</div>
+
+    <!-- Delimiter -->
+    <div class="irow" style="margin-bottom:10px;">
+      <label>Delimiter</label>
+      <div class="msw" id="tc-delim-sw">
+        <button class="mbtn on" data-delim="auto"  onclick="tcSetDelim(this)">Auto Detect</button>
+        <button class="mbtn"    data-delim=","     onclick="tcSetDelim(this)">Koma ( , )</button>
+        <button class="mbtn"    data-delim="	"     onclick="tcSetDelim(this)">Tab</button>
+        <button class="mbtn"    data-delim=";"     onclick="tcSetDelim(this)">Titik Koma ( ; )</button>
+        <button class="mbtn"    data-delim="|"     onclick="tcSetDelim(this)">Pipe ( | )</button>
+        <button class="mbtn"    data-delim="custom" onclick="tcSetDelim(this)">Custom</button>
+      </div>
+    </div>
+    <div id="tc-custom-row" class="irow" style="display:none;margin-bottom:10px;">
+      <label>Karakter Custom</label>
+      <input type="text" class="sinput" id="tc-custom-delim" placeholder="contoh: # atau ::" maxlength="5" oninput="tcPreview()" style="max-width:120px;">
+    </div>
+
+    <!-- Options toggles -->
+    <div class="orow">
+      <label class="tgrp" onclick="$('tc-tog-hdr').classList.toggle('on');tcPreview()">
+        <div class="tog on" id="tc-tog-hdr"></div>
+        <span class="tog-lbl">Baris pertama sebagai header</span>
+      </label>
+      <label class="tgrp" onclick="$('tc-tog-trim').classList.toggle('on');tcPreview()">
+        <div class="tog on" id="tc-tog-trim"></div>
+        <span class="tog-lbl">Trim spasi di tiap sel</span>
+      </label>
+      <label class="tgrp" onclick="$('tc-tog-skip').classList.toggle('on');tcPreview()">
+        <div class="tog" id="tc-tog-skip"></div>
+        <span class="tog-lbl">Lewati baris kosong</span>
+      </label>
+      <label class="tgrp" onclick="$('tc-tog-quot').classList.toggle('on');tcPreview()">
+        <div class="tog on" id="tc-tog-quot"></div>
+        <span class="tog-lbl">Handle tanda kutip ("...")</span>
+      </label>
+    </div>
+
+    <!-- Encoding -->
+    <div class="irow" style="margin-top:4px;margin-bottom:0;">
+      <label>Encoding</label>
+      <select class="sinput" id="tc-enc" onchange="tcReloadFiles()" style="max-width:160px;">
+        <option value="utf-8">UTF-8</option>
+        <option value="windows-1252">Windows-1252 (ANSI)</option>
+        <option value="iso-8859-1">ISO-8859-1</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="srow three" id="tc-stats">
+    <div class="sbox"><div class="snum" id="tc-s-files">0</div><div class="slbl">File</div></div>
+    <div class="sbox"><div class="snum" id="tc-s-rows">0</div><div class="slbl">Baris Data</div></div>
+    <div class="sbox"><div class="snum" id="tc-s-cols">0</div><div class="slbl">Kolom</div></div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card" id="tc-pv-card" style="display:none;">
+    <div class="card-bar"></div>
+    <div class="clabel">Preview Data (50 baris pertama) — File: <span id="tc-pv-fname" style="color:var(--c8);font-style:italic;"></span></div>
+    <div id="tc-pv-wrap" style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+      <table id="tc-pv-tbl" style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px;"></table>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;" id="tc-pv-note"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="card" id="tc-act-card" style="display:none;">
+    <div class="card-bar"></div>
+    <div class="clabel">Export</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div class="msw">
+        <button class="mbtn on" id="tc-out-xlsx" onclick="tcSetOut('xlsx',this)">📊 Excel (.xlsx)</button>
+        <button class="mbtn"    id="tc-out-csv"  onclick="tcSetOut('csv',this)">📄 CSV (.csv)</button>
+      </div>
+      <div id="tc-csv-opts" style="display:flex;gap:8px;align-items:center;display:none;">
+        <label style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;">CSV Delimiter</label>
+        <select class="sinput" id="tc-csv-delim" style="max-width:140px;">
+          <option value=",">Koma ( , )</option>
+          <option value=";">Titik Koma ( ; )</option>
+          <option value="	">Tab</option>
+          <option value="|">Pipe ( | )</option>
+        </select>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn-main" id="tc-dl-btn" onclick="tcDownload()" style="padding:11px 28px;border-radius:10px;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .22s;" disabled>
+          ⬇ Download
+        </button>
+        <button onclick="tcReset()" style="padding:11px 16px;border-radius:10px;border:1.5px solid var(--border2);background:white;color:var(--ink3);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='var(--ink)'" onmouseout="this.style.borderColor='var(--border2)'">Reset</button>
+      </div>
+    </div>
+    <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:14px;display:none;" id="tc-prog-wrap">
+      <div id="tc-prog" style="height:100%;width:0%;background:var(--c8);border-radius:2px;transition:width .3s ease;"></div>
+    </div>
   </div>
 </div>
 
@@ -1381,6 +1557,560 @@ function nav(id, el) {
   // Initial render
   flFilter();
 })();
+
+/* ══════════════════════════════════════════════════════════
+   08 · TXT → EXCEL / CSV CONVERTER  (with ND95 Smart Parser)
+══════════════════════════════════════════════════════════ */
+(function(){
+  let tcFiles=[], tcParsed=[], tcDelim='auto', tcOutFmt='xlsx', tcMode='nd95';
+  let previewIdx=0;
+
+  const zone=$('tc-z'), inp=$('tc-i');
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');handleFiles([...e.dataTransfer.files].filter(f=>f.name.endsWith('.txt')));});
+  inp.addEventListener('change',()=>handleFiles([...inp.files]));
+
+  function handleFiles(newFiles){
+    if(!newFiles.length)return;
+    newFiles.forEach(f=>{if(!tcFiles.find(x=>x.name===f.name&&x.size===f.size))tcFiles.push(f);});
+    renderFileList();
+    readAllFilesAndPreview();
+  }
+
+  function renderFileList(){
+    const fl=$('tc-fl');
+    fl.classList.toggle('on',tcFiles.length>0);
+    fl.innerHTML=tcFiles.map((f,i)=>`
+      <div class="fitem">
+        <span style="font-size:16px;">📝</span>
+        <span class="fitem-n">${esc(f.name)}</span>
+        <span class="fitem-s">${fmts(f.size)}</span>
+        <button class="fitem-rm" onclick="tcRemoveFile(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  window.tcRemoveFile=function(i){tcFiles.splice(i,1);if(!tcFiles.length){tcReset();return;}renderFileList();readAllFilesAndPreview();};
+
+  function readTextFile(file,encoding){
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=e=>res(e.target.result);
+      r.onerror=()=>rej(new Error('Read failed'));
+      r.readAsText(file,encoding);
+    });
+  }
+
+  // ══════════════════════════════════════════════
+  //  ND95 SMART PARSER
+  // ══════════════════════════════════════════════
+
+  const ND95_REPORT_TYPES=[
+    {id:'buku_penjualan',   label:'📦 Buku Penjualan',          patterns:['BUKU.*PENJUALAN']},
+    {id:'buku_retur',       label:'↩️ Buku Retur Penjualan',    patterns:['BUKU.*RETUR.*PENJUALAN']},
+    {id:'lap_piutang',      label:'💰 Laporan Piutang Per Nota', patterns:['LAPORAN.*PIUTANG']},
+    {id:'mutasi_piutang',   label:'🔄 Mutasi Piutang',          patterns:['MUTASI PIUTANG']},
+    {id:'kartu_stock',      label:'📋 Kartu Stock',             patterns:['KARTU.*STOCK']},
+    {id:'mutasi_stock',     label:'📊 Mutasi Stock',            patterns:['MUTASI.*STOCK']},
+    {id:'listing_pembelian',label:'🛒 Listing Pembelian',       patterns:['LISTING.*PEMBELIAN']},
+    {id:'retur_pembelian',  label:'↩️ Retur Pembelian',        patterns:['RETUR.*PEMBELIAN']},
+  ];
+
+  function nd95DetectReportType(text){
+    const upper=text.slice(0,1000).toUpperCase();
+    for(const rt of ND95_REPORT_TYPES){
+      for(const p of rt.patterns){
+        if(new RegExp(p).test(upper)) return rt;
+      }
+    }
+    return {id:'generic',label:'📄 Laporan ND95'};
+  }
+
+  function nd95IsND95(text){
+    return /ReportId-\d+|\\Akhir Laporan\\|ND95.*BASIC MODULES|Rel-\d/.test(text);
+  }
+
+  // Detect column break positions from a set of data lines
+  // We look for positions that are consistently spaces across many data lines
+  function detectColumnBreaks(lines, minWidth=3){
+    if(!lines.length) return [];
+    const maxLen=Math.max(...lines.map(l=>l.length));
+    // Score each position: 1 if space in that col across lines, 0 if not
+    const spaceScore=new Array(maxLen).fill(0);
+    for(let col=0;col<maxLen;col++){
+      let spaceCount=0;
+      for(const l of lines){
+        if(col>=l.length||l[col]===' ') spaceCount++;
+      }
+      spaceScore[col]=spaceCount/lines.length;
+    }
+    // Find column breaks: positions where score > 0.75 and adjacent non-space clusters
+    const breaks=[];
+    let inGap=false;
+    let gapStart=0;
+    for(let i=0;i<maxLen;i++){
+      if(spaceScore[i]>=0.75){
+        if(!inGap){inGap=true;gapStart=i;}
+      } else {
+        if(inGap){
+          breaks.push(gapStart);
+          inGap=false;
+        }
+      }
+    }
+    return breaks;
+  }
+
+  // Slice a line into fields using column break positions
+  function sliceByBreaks(line, breaks){
+    const fields=[];
+    let prev=0;
+    for(const b of breaks){
+      if(b>prev) fields.push(line.slice(prev,b));
+      prev=b;
+    }
+    fields.push(line.slice(prev));
+    return fields.map(f=>f.trim());
+  }
+
+  // Clean ND95 number strings: "1234,567,890" or "1,234,567" or "1234.567"
+  function cleanND95Number(s){
+    s=s.trim();
+    if(!s||s==='-'||s==='—') return '';
+    // ND95 uses Indonesian format: dots=thousands, commas in large numbers
+    // Pattern: digits with commas and dots mixed (e.g. "4,612,216,340" or "1264,698,867")
+    const numOnly=s.replace(/[,\.]/g,'');
+    if(/^\d+$/.test(numOnly) && s.match(/[\d,\.]/)){
+      // Distinguish: if it has commas like "1234,567" that's a number
+      // Return as plain number
+      return Number(numOnly);
+    }
+    return s;
+  }
+
+  function nd95ParseText(text){
+    const lines=text.split(/\r?\n/);
+    const reportType=nd95DetectReportType(text);
+
+    // Step 1: find metadata (company name, date range, report title)
+    const meta={};
+    const companyLine=lines.find(l=>/PT\.|CV\.|UD\./.test(l)&&l.length>20);
+    if(companyLine) meta.company=companyLine.trim();
+
+    // Step 2: locate the column-header section and data section
+    // Data rows in ND95 typically:
+    // - Start with a code (JL/JQ/BR + digits, or customer code) OR
+    // - Start with spaces then date DD-Mon-YY OR
+    // - Start with a salesman code
+    const dataRowPattern=/^\s*[A-Z]{1,3}\d{4,}|^\s+\d{2}-[A-Za-z]{3}-\d{2}|\d{3},\d{3}|\d{1,3}\.\d{3}\.\d{3}/;
+    const skipPatterns=[/^\s*[-=]{5,}/,/Akhir Laporan/,/ReportId/,/Rel-\d/,/Hal-\s*\d/,/^\s*$/];
+
+    // Find first data row
+    let dataStart=-1;
+    for(let i=0;i<lines.length;i++){
+      if(skipPatterns.some(p=>p.test(lines[i]))) continue;
+      if(dataRowPattern.test(lines[i])){dataStart=i;break;}
+    }
+
+    if(dataStart===-1){
+      // Try alternative: look for lines with many numbers separated by spaces
+      for(let i=5;i<lines.length;i++){
+        const l=lines[i];
+        if(skipPatterns.some(p=>p.test(l))) continue;
+        const nums=(l.match(/[\d,\.]+/g)||[]).filter(n=>n.length>4);
+        if(nums.length>=2&&l.trim().length>20){dataStart=i;break;}
+      }
+    }
+
+    if(dataStart===-1){
+      // Absolute fallback
+      return nd95FallbackParse(lines);
+    }
+
+    // Step 3: collect header lines (look back from dataStart for non-empty lines)
+    let headerLines=[];
+    for(let i=dataStart-1;i>=Math.max(0,dataStart-8);i--){
+      const l=lines[i];
+      if(l.trim()===''&&headerLines.length>0) break;
+      if(l.trim()===''&&headerLines.length===0) continue;
+      if(/ReportId|Rel-\d|Hal-\s*\d|PT\.|^\s*\d{2}-[A-Za-z]{3}/.test(l)) continue;
+      if(l.trim().length>3) headerLines.unshift(l);
+    }
+    // Keep max last 3 lines as column headers
+    if(headerLines.length>3) headerLines=headerLines.slice(-3);
+
+    // Step 4: collect data rows (skip totals/dashes/meta)
+    const rawDataLines=[];
+    const totalLines=[];
+    for(let i=dataStart;i<lines.length;i++){
+      const l=lines[i];
+      if(skipPatterns.some(p=>p.test(l))) continue;
+      if(/^\\|Kriteria|Salesman\s+SEMUA|Customer\s+SEMUA/.test(l)) break;
+      if(/^\s*(Total|Subtotal|#Nota)/i.test(l)){totalLines.push(l);}
+      else if(l.trim().length>5){rawDataLines.push(l);}
+    }
+
+    // Step 5: detect column breaks from data rows
+    const breaks=detectColumnBreaks(rawDataLines.slice(0,40));
+
+    // Step 6: build headers by merging multi-line header text at break positions
+    let headers=[];
+    if(headerLines.length>0&&breaks.length>0){
+      // For each header line, slice it by break positions
+      const slicedHeaders=headerLines.map(l=>sliceByBreaks(l,breaks));
+      // Combine multi-line headers by joining non-empty values at each column position
+      const maxCols=Math.max(...slicedHeaders.map(r=>r.length));
+      for(let c=0;c<maxCols;c++){
+        const parts=slicedHeaders.map(r=>(r[c]||'').trim()).filter(Boolean);
+        headers.push(parts.join(' ')||('Kol '+(c+1)));
+      }
+    } else {
+      // Auto-generate headers
+      const sample=rawDataLines[0]||'';
+      const sampleFields=sliceByBreaks(sample,breaks);
+      headers=sampleFields.map((_,i)=>'Kol '+(i+1));
+    }
+
+    // Step 7: parse data rows into structured rows
+    const dataRows=rawDataLines.map(l=>{
+      const fields=sliceByBreaks(l,breaks);
+      // Pad to header length
+      while(fields.length<headers.length) fields.push('');
+      return fields.map((f,i)=>{
+        // Try to identify numeric columns by header name
+        const h=(headers[i]||'').toLowerCase();
+        const isNumericCol=/total|nilai|jumlah|retur|disc|ppn|pajak|piutang|debet|kredit|saldo|harga|qty|outstanding|subtotal/.test(h);
+        if(isNumericCol||/^[\d,\.\s-]+$/.test(f)){
+          const n=cleanND95Number(f);
+          return n===''?f:n;
+        }
+        return f;
+      });
+    });
+
+    // Step 8: also add total rows (tagged)
+    const totalRows=totalLines.map(l=>{
+      const fields=sliceByBreaks(l,breaks);
+      while(fields.length<headers.length) fields.push('');
+      return fields.map(f=>{
+        const n=cleanND95Number(f);
+        return n===''?f:n;
+      });
+    });
+
+    // Combine: data rows, blank separator, total rows
+    const allData=[...dataRows];
+    if(totalRows.length>0){
+      allData.push(new Array(headers.length).fill(''));
+      allData.push(...totalRows);
+    }
+
+    // Add metadata sheet info
+    meta.reportType=reportType.label;
+    meta.totalDataRows=dataRows.length;
+    meta.columns=headers.length;
+
+    return {headers, data:allData, meta, reportType};
+  }
+
+  // Absolute fallback: just return trimmed non-empty lines as single column
+  function nd95FallbackParse(lines){
+    const data=lines.filter(l=>l.trim()).map(l=>[l.trim()]);
+    return {headers:['Isi Baris'], data, meta:{}, reportType:{id:'raw',label:'📄 Raw Text'}};
+  }
+
+  // ══════════════════════════════════════════════
+  //  STANDARD DELIMITER PARSER
+  // ══════════════════════════════════════════════
+  function tcDetectDelim(text){
+    if(tcDelim!=='auto')return tcDelim==='custom'?($('tc-custom-delim').value||','):tcDelim;
+    const sample=text.split('\n').slice(0,10).join('\n');
+    const counts={',':0,'\t':0,';':0,'|':0};
+    for(const c of Object.keys(counts)) counts[c]=(sample.match(new RegExp('\\'+c,'g'))||[]).length;
+    return Object.keys(counts).reduce((a,b)=>counts[a]>=counts[b]?a:b);
+  }
+
+  function tcParseTextStandard(text,delim){
+    const useHeader=$('tc-tog-hdr').classList.contains('on');
+    const doTrim=$('tc-tog-trim').classList.contains('on');
+    const skipEmpty=$('tc-tog-skip').classList.contains('on');
+    const handleQuotes=$('tc-tog-quot').classList.contains('on');
+    const rawLines=text.split(/\r?\n/);
+    const rows=[];
+    for(const line of rawLines){
+      if(skipEmpty&&line.trim()==='')continue;
+      const cols=handleQuotes?parseCSVLine(line,delim):line.split(delim);
+      rows.push(doTrim?cols.map(c=>c.trim()):cols);
+    }
+    if(!rows.length)return{headers:[],data:[]};
+    if(useHeader){return{headers:rows[0],data:rows.slice(1)};}
+    const colCount=Math.max(...rows.map(r=>r.length));
+    return{headers:Array.from({length:colCount},(_,i)=>'Kolom '+(i+1)),data:rows};
+  }
+
+  function parseCSVLine(line,delim){
+    const result=[];let cur='';let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+      else if(!inQ&&line.slice(i,i+delim.length)===delim){result.push(cur);cur='';i+=delim.length-1;}
+      else cur+=ch;
+    }
+    result.push(cur);return result;
+  }
+
+  // ══════════════════════════════════════════════
+  //  UI CONTROLS
+  // ══════════════════════════════════════════════
+  window.tcSetMode=function(mode,btn){
+    tcMode=mode;
+    const modeNd=$('tc-mode-nd95'), modeStd=$('tc-mode-std');
+    const nd95Style='flex:1;padding:14px;border-radius:10px;border:2px solid var(--c8);background:var(--c8l);color:var(--c8);font-family:\'Outfit\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;';
+    const stdActive='flex:1;padding:14px;border-radius:10px;border:2px solid var(--c5);background:var(--c5l);color:var(--c5);font-family:\'Outfit\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;';
+    const inactive='flex:1;padding:14px;border-radius:10px;border:2px solid var(--border);background:white;color:var(--ink3);font-family:\'Outfit\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;';
+    if(mode==='nd95'){
+      modeNd.style.cssText=nd95Style;
+      modeStd.style.cssText=inactive;
+      $('tc-nd95-info').style.display='block';
+      $('tc-opts').style.display='none';
+    } else {
+      modeStd.style.cssText=stdActive;
+      modeNd.style.cssText=inactive;
+      $('tc-nd95-info').style.display='none';
+      $('tc-opts').style.display=tcFiles.length?'block':'none';
+    }
+    if(tcFiles.length) readAllFilesAndPreview();
+  };
+
+  window.tcSetDelim=function(btn){
+    document.querySelectorAll('#tc-delim-sw .mbtn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    tcDelim=btn.dataset.delim;
+    $('tc-custom-row').style.display=tcDelim==='custom'?'flex':'none';
+    if(tcFiles.length)readAllFilesAndPreview();
+  };
+
+  window.tcSetOut=function(fmt,btn){
+    tcOutFmt=fmt;
+    document.querySelectorAll('#tc-act-card .msw .mbtn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    const csvOpts=$('tc-csv-opts');
+    if(csvOpts) csvOpts.style.display=fmt==='csv'?'flex':'none';
+  };
+
+  window.tcReloadFiles=function(){if(tcFiles.length)readAllFilesAndPreview();};
+  window.tcPreview=function(){if(tcFiles.length)readAllFilesAndPreview();};
+
+  // ══════════════════════════════════════════════
+  //  STATS & PREVIEW
+  // ══════════════════════════════════════════════
+  function updateStats(){
+    $('tc-s-files').textContent=tcParsed.length;
+    const totalRows=tcParsed.reduce((s,p)=>s+p.rows.data.length,0);
+    const maxCols=tcParsed.length?Math.max(...tcParsed.map(p=>p.rows.headers.length)):0;
+    $('tc-s-rows').textContent=totalRows.toLocaleString('id-ID');
+    $('tc-s-cols').textContent=maxCols;
+  }
+
+  function renderPreview(parsed){
+    if(!parsed)return;
+    $('tc-pv-fname').textContent=parsed.name;
+    const{headers,data}=parsed.rows;
+    const preview=data.slice(0,50);
+    const totalRows=data.length;
+    // Build table with nice formatting
+    let html=`<thead><tr style="background:var(--c8l);">`;
+    html+=`<th style="padding:8px 10px;border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);width:32px;">#</th>`;
+    headers.forEach(h=>{
+      html+=`<th style="padding:8px 10px;border:1px solid var(--border);text-align:left;font-family:'Outfit',sans-serif;font-weight:700;font-size:12px;color:var(--ink2);white-space:nowrap;background:var(--c8l);">${esc(String(h))}</th>`;
+    });
+    html+=`</tr></thead><tbody>`;
+    preview.forEach((row,ri)=>{
+      const isTotal=!row[0]&&row.some(c=>typeof c==='number'&&c>100000);
+      const rowBg=isTotal?'var(--bg2)':(ri%2===0?'white':'var(--bg)');
+      html+=`<tr style="background:${rowBg};">`;
+      html+=`<td style="padding:6px 10px;border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:center;">${ri+1}</td>`;
+      headers.forEach((_,ci)=>{
+        const v=row[ci]!==undefined?row[ci]:'';
+        const isNum=typeof v==='number';
+        const display=isNum?v.toLocaleString('id-ID'):String(v);
+        const align=isNum?'right':'left';
+        const color=isNum?'var(--ink2)':'var(--ink3)';
+        html+=`<td style="padding:6px 10px;border:1px solid var(--border);font-size:11px;color:${color};max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:${align};font-family:${isNum?"'JetBrains Mono',monospace":"'Outfit',sans-serif"};" title="${esc(display)}">${esc(display)||'<span style="color:var(--muted)">—</span>'}</td>`;
+      });
+      html+=`</tr>`;
+    });
+    $('tc-pv-tbl').innerHTML=html+'</tbody>';
+    let note=totalRows>50?`Menampilkan 50 dari ${totalRows.toLocaleString('id-ID')} baris.`:`Total ${totalRows.toLocaleString('id-ID')} baris.`;
+    if(parsed.rows.meta&&parsed.rows.meta.reportType) note+=` · ${parsed.rows.meta.reportType}`;
+    $('tc-pv-note').textContent=note;
+    if(tcParsed.length>1){
+      $('tc-pv-note').innerHTML+=' <span style="color:var(--c8);font-size:11px;cursor:pointer;font-weight:600;" onclick="tcNextPreview()">→ File berikutnya</span>';
+    }
+  }
+
+  window.tcNextPreview=function(){
+    previewIdx=(previewIdx+1)%tcParsed.length;
+    renderPreview(tcParsed[previewIdx]);
+  };
+
+  // ══════════════════════════════════════════════
+  //  MAIN FILE READER
+  // ══════════════════════════════════════════════
+  async function readAllFilesAndPreview(){
+    if(!tcFiles.length)return;
+    $('tc-mode-card').style.display='block';
+    $('tc-pv-card').style.display='none';
+    $('tc-act-card').style.display='none';
+    $('tc-dl-btn').disabled=true;
+    tcParsed=[];
+    const enc=$('tc-enc')?$('tc-enc').value:'utf-8';
+    let detectedND95=false;
+    for(const f of tcFiles){
+      const txt=await readTextFile(f,enc);
+      let rows;
+      const isND95=nd95IsND95(txt);
+      if(tcMode==='nd95'&&isND95){
+        detectedND95=true;
+        rows=nd95ParseText(txt);
+      } else if(tcMode==='nd95'&&!isND95){
+        // Auto fallback to standard for non-ND95 files
+        const delim=tcDetectDelim(txt);
+        rows=tcParseTextStandard(txt,delim);
+        rows.meta={};rows.reportType={label:'📋 Standard TXT'};
+      } else {
+        const delim=tcDetectDelim(txt);
+        rows=tcParseTextStandard(txt,delim);
+        if(!rows.meta) rows.meta={};
+        if(!rows.reportType) rows.reportType={label:'📋 Standard TXT'};
+      }
+      tcParsed.push({name:f.name,rows});
+    }
+    updateStats();
+    // Show detected report types
+    if(detectedND95){
+      const typeEl=$('tc-nd95-report-type');
+      typeEl.style.display='block';
+      const types=[...new Set(tcParsed.map(p=>p.rows.reportType&&p.rows.reportType.label).filter(Boolean))];
+      $('tc-nd95-detected').textContent=types.join(' · ');
+    }
+    $('tc-stats').classList.add('on');
+    $('tc-pv-card').style.display='block';
+    $('tc-act-card').style.display='block';
+    $('tc-dl-btn').disabled=false;
+    previewIdx=0;
+    renderPreview(tcParsed[0]);
+  }
+
+  // ══════════════════════════════════════════════
+  //  DOWNLOAD
+  // ══════════════════════════════════════════════
+  window.tcDownload=function(){
+    if(!tcParsed.length){toast('⚠️','Belum ada file yang diproses.');return;}
+    $('tc-prog-wrap').style.display='block';
+    $('tc-prog').style.width='20%';
+    try{if(tcOutFmt==='xlsx'){dlXlsx();}else{dlCsv();}}
+    catch(e){toast('❌','Gagal export: '+e.message);$('tc-prog-wrap').style.display='none';}
+  };
+
+  function dlXlsx(){
+    const wb=XLSX.utils.book_new();
+    tcParsed.forEach((p,idx)=>{
+      const{headers,data}=p.rows;
+      // Convert numbers back to actual numbers in AOA
+      const aoa=[headers,...data.map(row=>row.map(c=>c))];
+      const ws=XLSX.utils.aoa_to_sheet(aoa);
+      // Style: freeze top row
+      ws['!freeze']={xSplit:0,ySplit:1};
+      // Auto column widths
+      const colWidths=headers.map((h,ci)=>{
+        const maxLen=Math.max(String(h).length,...data.slice(0,200).map(r=>{
+          const v=r[ci];
+          return v!==undefined?String(typeof v==='number'?v.toLocaleString('id-ID'):v).length:0;
+        }));
+        return {wch:Math.min(maxLen+3,45)};
+      });
+      ws['!cols']=colWidths;
+      // Number format for numeric columns
+      const range=XLSX.utils.decode_range(ws['!ref']||'A1');
+      for(let c=0;c<=range.e.c;c++){
+        const h=String(headers[c]||'').toLowerCase();
+        const isNum=/total|nilai|jumlah|retur|disc|ppn|pajak|piutang|debet|kredit|saldo|harga|qty|outstanding/.test(h);
+        if(isNum){
+          for(let r=1;r<=range.e.r;r++){
+            const cellAddr=XLSX.utils.encode_cell({r,c});
+            if(ws[cellAddr]&&typeof ws[cellAddr].v==='number'){
+              ws[cellAddr].z='#,##0';
+            }
+          }
+        }
+      }
+      const shName=(p.name.replace(/\.txt$/i,'')||'Sheet').slice(0,28).replace(/[\\/*?:[\]]/g,'_');
+      XLSX.utils.book_append_sheet(wb,ws,shName+(tcParsed.length>1?'_'+(idx+1):''));
+      $('tc-prog').style.width=((idx+1)/tcParsed.length*78+20)+'%';
+    });
+    $('tc-prog').style.width='100%';
+    const fname=tcParsed.length===1?tcParsed[0].name.replace(/\.txt$/i,'.xlsx'):'nd95_converted.xlsx';
+    dlBlob(xblob(wb),fname);
+    setTimeout(()=>{$('tc-prog-wrap').style.display='none';$('tc-prog').style.width='0%';},800);
+    toast('📥',`Berhasil diexport: ${fname}!`);
+  }
+
+  function dlCsv(){
+    const sep=$('tc-csv-delim').value;
+    if(tcParsed.length===1){
+      const{headers,data}=tcParsed[0].rows;
+      const csv=buildCsv([headers,...data],sep);
+      const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+      saveAs(blob,tcParsed[0].name.replace(/\.txt$/i,'.csv'));
+      $('tc-prog').style.width='100%';
+      setTimeout(()=>{$('tc-prog-wrap').style.display='none';$('tc-prog').style.width='0%';},800);
+      toast('📄','CSV disimpan!');
+    } else {
+      const zip=new JSZip();
+      tcParsed.forEach((p,i)=>{
+        const{headers,data}=p.rows;
+        zip.file(p.name.replace(/\.txt$/i,'.csv'),'\uFEFF'+buildCsv([headers,...data],sep));
+        $('tc-prog').style.width=((i+1)/tcParsed.length*80+10)+'%';
+      });
+      $('tc-prog').style.width='95%';
+      zip.generateAsync({type:'blob'}).then(blob=>{
+        saveAs(blob,'nd95_converted_csv.zip');
+        $('tc-prog').style.width='100%';
+        setTimeout(()=>{$('tc-prog-wrap').style.display='none';$('tc-prog').style.width='0%';},800);
+        toast('📦',`${tcParsed.length} file CSV didownload!`);
+      });
+    }
+  }
+
+  function buildCsv(rows,sep){
+    return rows.map(row=>row.map(cell=>{
+      const s=String(cell??'');
+      return (s.includes(sep)||s.includes('"')||s.includes('\n'))?`"${s.replace(/"/g,'""')}"`:s;
+    }).join(sep)).join('\r\n');
+  }
+
+  // ══════════════════════════════════════════════
+  //  RESET
+  // ══════════════════════════════════════════════
+  window.tcReset=function(){
+    tcFiles=[];tcParsed=[];tcDelim='auto';previewIdx=0;
+    inp.value='';
+    $('tc-fl').classList.remove('on');$('tc-fl').innerHTML='';
+    $('tc-mode-card').style.display='none';
+    $('tc-opts').style.display='none';
+    $('tc-stats').classList.remove('on');
+    $('tc-pv-card').style.display='none';
+    $('tc-act-card').style.display='none';
+    $('tc-dl-btn').disabled=true;
+    $('tc-prog-wrap').style.display='none';
+    $('tc-nd95-report-type').style.display='none';
+    document.querySelectorAll('#tc-delim-sw .mbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
+    tcDelim='auto';
+  };
+
+})();
+
 
 /* ══════════════════════════════════════════════════════════
    07 · DATA FORMATTER
