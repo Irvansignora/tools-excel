@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExcelKit Pro · 8 Tools dalam 1</title>
+<title>ExcelKit Pro · 9 Tools dalam 1</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -32,6 +32,7 @@
   --c6: #8b2252;  --c6l: #fae8f0;  /* Formula      – rose */
   --c7: #2e6b5e;  --c7l: #e4f2ef;  /* Formatter    – teal */
   --c8: #5b4a9e;  --c8l: #eeebfb;  /* TXT Converter – indigo */
+  --c9: #1a7a3a;  --c9l: #e4f5eb;  /* E-Faktur Merger – emerald */
 
   --danger:#bf3030;
   --sh:  0 1px 4px rgba(28,18,8,.07);
@@ -451,6 +452,42 @@ tr:hover td{background:var(--bg);}
 #p-txtconv .msw .mbtn.on{color:var(--c8);}
 #p-txtconv .tog.on{border-color:var(--c8);}
 #p-txtconv .tog.on::after{background:var(--c8);}
+/* E-Faktur Merger */
+#p-efaktur .ph-tag{color:var(--c9)}
+#p-efaktur .ph-badge{color:var(--c9)}
+#p-efaktur .card-bar{background:var(--c9)}
+#p-efaktur .uzone:hover,#p-efaktur .uzone.drag{border-color:var(--c9);background:var(--c9l);}
+#p-efaktur .dz-ic{background:var(--c9l);border:1.5px solid rgba(26,122,58,.2);}
+#p-efaktur .fbar{background:var(--c9l);border-color:rgba(26,122,58,.25);}
+#p-efaktur .fbar-name{color:var(--c9)}
+#p-efaktur .btn-main{background:var(--c9);color:white;}
+#p-efaktur .btn-main:hover:not(:disabled){background:#115a28;box-shadow:0 6px 20px rgba(26,122,58,.3);}
+.sbt[data-tool="efaktur"].active .sbt-dot{background:var(--c9);}
+/* E-Faktur internal styles */
+.ef-file-list{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+.ef-file-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:11px;}
+.ef-file-item .ef-idx{color:var(--c9);font-weight:700;min-width:22px;}
+.ef-file-item .ef-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2);}
+.ef-file-item .ef-size{color:var(--muted);font-size:10px;}
+.ef-file-item .ef-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;letter-spacing:.07em;border:1px solid;}
+.ef-tag-header{background:var(--c9l);color:var(--c9);border-color:rgba(26,122,58,.25);}
+.ef-tag-data{background:var(--c5l);color:var(--c5);border-color:rgba(26,95,138,.2);}
+.ef-file-item .ef-rm{background:rgba(191,48,48,.07);border:none;color:var(--danger);width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.ef-file-item .ef-rm:hover{background:rgba(191,48,48,.2);}
+.ef-sort-hint{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:8px;padding:7px 12px;background:var(--c5l);border:1px solid rgba(26,95,138,.15);border-radius:8px;display:none;}
+.ef-log{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);max-height:180px;overflow-y:auto;line-height:1.8;margin-top:12px;display:none;}
+.ef-log.on{display:block;}
+.ef-log .ef-ok{color:var(--c9);}
+.ef-log .ef-skip{color:var(--c5);}
+.ef-log .ef-done{color:var(--c4);font-weight:600;}
+.ef-log .ef-err{color:var(--danger);}
+.ef-result{display:none;background:var(--c9l);border:1.5px solid rgba(26,122,58,.3);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.ef-result.on{display:block;}
+.ef-res-hdr{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid rgba(26,122,58,.2);background:rgba(26,122,58,.05);}
+.ef-res-hdr h3{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--c9);}
+.ef-res-stats{display:flex;gap:24px;padding:16px 20px;flex-wrap:wrap;}
+.ef-stat .ef-stat-val{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--c9);line-height:1;margin-bottom:4px;}
+.ef-stat .ef-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
 
 /* RESPONSIVE */
 @media(max-width:700px){
@@ -477,7 +514,7 @@ tr:hover td{background:var(--bg);}
 <aside class="sidebar">
   <div class="sb-brand">
     <div class="sb-wordmark">Excel<em>Kit</em></div>
-    <div class="sb-tagline">8 Tools · All-in-One</div>
+    <div class="sb-tagline">9 Tools · All-in-One</div>
   </div>
 
   <div class="sb-section-lbl">Tools</div>
@@ -490,6 +527,7 @@ tr:hover td{background:var(--bg);}
     <button class="sbt"        data-tool="formula"   onclick="nav('formula',this)">  <span class="sbt-dot"></span>📚 Formula Library  <span class="sbt-num">06</span></button>
     <button class="sbt"        data-tool="formatter" onclick="nav('formatter',this)"><span class="sbt-dot"></span>🎨 Data Formatter   <span class="sbt-num">07</span></button>
     <button class="sbt"        data-tool="txtconv"   onclick="nav('txtconv',this)">  <span class="sbt-dot"></span>📝 TXT → Excel/CSV  <span class="sbt-num">08</span></button>
+    <button class="sbt"        data-tool="efaktur"   onclick="nav('efaktur',this)">  <span class="sbt-dot"></span>🧾 CSV E-Faktur Merger <span class="sbt-num">09</span></button>
   </div>
 
   <div class="sb-footer">Crafted by Irvan_signora</div>
@@ -950,6 +988,72 @@ tr:hover td{background:var(--bg);}
     <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:14px;display:none;" id="tc-prog-wrap">
       <div id="tc-prog" style="height:100%;width:0%;background:var(--c8);border-radius:2px;transition:width .3s ease;"></div>
     </div>
+  </div>
+</div>
+<!-- ──────────────── 09 E-FAKTUR MERGER ──────────────── -->
+<div class="panel" id="p-efaktur">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-tag">Tool 09 · E-Faktur Merger</div>
+      <div class="ph-title">CSV E-Faktur Merger</div>
+      <div class="ph-desc">Gabungkan multiple file CSV e-Faktur DJP menjadi satu file. Header file pertama dipertahankan, file berikutnya di-skip 3 baris header otomatis.</div>
+    </div>
+    <div class="ph-badge">CSV · E-FAKTUR DJP</div>
+  </div>
+
+  <!-- Upload -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="clabel">Upload File CSV E-Faktur</div>
+    <div class="uzone" id="ef-z">
+      <input type="file" id="ef-i" multiple accept=".csv">
+      <div class="dz-ic">📂</div>
+      <div class="dz-t">Drag & drop atau klik untuk pilih</div>
+      <div class="dz-s">*.csv · Format E-Faktur DJP · Bisa multi-file</div>
+    </div>
+    <div class="ef-file-list" id="ef-fl"></div>
+    <div class="ef-sort-hint" id="ef-hint">💡 File diurutkan otomatis by nama. Klik ✕ untuk hapus file.</div>
+  </div>
+
+  <!-- Options -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="clabel">Konfigurasi Output</div>
+    <div class="irow">
+      <label>Nama File Output</label>
+      <input type="text" id="ef-outname" class="sinput" value="GABUNGAN_EFAKTUR.csv">
+    </div>
+    <div style="padding:10px 14px;background:var(--c9l);border:1px solid rgba(26,122,58,.2);border-radius:9px;font-size:12px;color:var(--ink3);line-height:1.6;">
+      ✅ <strong>Header otomatis</strong> — File pertama diambil seluruhnya (termasuk 3 baris header e-Faktur). File ke-2 dst, 3 baris header di-skip, hanya data yang digabung.
+    </div>
+  </div>
+
+  <!-- Progress & merge -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="clabel">Proses Penggabungan</div>
+    <div class="brow">
+      <button class="btn btn-main" id="ef-btn" disabled onclick="efMerge()">⚡&ensp;Gabungkan Sekarang</button>
+    </div>
+    <div class="pw" id="ef-pw" style="display:none;"><div class="ph2"><span id="ef-pl">Memproses...</span><span id="ef-pp">0%</span></div><div class="pt"><div class="pf" style="background:var(--c9);" id="ef-pf"></div></div></div>
+    <div class="ef-log" id="ef-log"></div>
+  </div>
+
+  <!-- Result -->
+  <div class="ef-result" id="ef-result">
+    <div class="ef-res-hdr"><span style="font-size:20px;">✅</span><h3>BERHASIL DIGABUNGKAN</h3></div>
+    <div class="ef-res-stats">
+      <div class="ef-stat"><div class="ef-stat-val" id="ef-stat-files">0</div><div class="ef-stat-lbl">File Digabung</div></div>
+      <div class="ef-stat"><div class="ef-stat-val" id="ef-stat-rows">0</div><div class="ef-stat-lbl">Total Baris</div></div>
+      <div class="ef-stat"><div class="ef-stat-val" id="ef-stat-size">0 KB</div><div class="ef-stat-lbl">Ukuran Output</div></div>
+    </div>
+    <div style="padding:0 20px 20px;">
+      <a class="btn btn-main" id="ef-dl" href="#" download style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">⬇&ensp;Download Hasil CSV</a>
+    </div>
+  </div>
+
+  <div class="brow" style="margin-top:4px;">
+    <button class="btn bgh" id="ef-res-btn" onclick="efReset()">↺&ensp;Reset / Upload Baru</button>
   </div>
 </div>
 
@@ -2217,6 +2321,166 @@ function nav(id, el) {
     const nwb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(nwb,XLSX.utils.aoa_to_sheet(window._ftData),'Formatted');
     dlBlob(xblob(nwb),orig.replace(/\.[^.]+$/,'')+'_formatted.xlsx');toast('📥','Data terformat berhasil didownload!');
   }
+})();
+
+
+/* ══════════════════════════════════════════════════════════
+   09 · E-FAKTUR CSV MERGER
+══════════════════════════════════════════════════════════ */
+(function(){
+  let efFiles = [];
+  let efIdCounter = 0;
+
+  const zone = $('ef-z');
+  const inp  = $('ef-i');
+
+  // Drag & Drop
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); efAddFiles([...e.dataTransfer.files]); });
+  inp.addEventListener('change', () => { efAddFiles([...inp.files]); inp.value = ''; });
+
+  function efAddFiles(newFiles) {
+    const csvs = newFiles.filter(f => f.name.toLowerCase().endsWith('.csv'));
+    csvs.forEach(f => {
+      if (!efFiles.find(x => x.name === f.name)) {
+        efFiles.push({ name: f.name, file: f, id: efIdCounter++ });
+      }
+    });
+    efFiles.sort((a, b) => a.name.localeCompare(b.name));
+    efRenderList();
+  }
+
+  function efRenderList() {
+    const fl = $('ef-fl');
+    fl.innerHTML = '';
+    $('ef-result').classList.remove('on');
+    $('ef-log').classList.remove('on');
+    $('ef-pw').style.display = 'none';
+
+    const hint = $('ef-hint');
+    if (efFiles.length === 0) {
+      hint.style.display = 'none';
+      $('ef-btn').disabled = true;
+      return;
+    }
+    hint.style.display = efFiles.length > 1 ? 'block' : 'none';
+    $('ef-btn').disabled = efFiles.length < 2;
+
+    efFiles.forEach((f, idx) => {
+      const div = document.createElement('div');
+      div.className = 'ef-file-item';
+      div.innerHTML = `
+        <span class="ef-idx">${String(idx+1).padStart(2,'0')}</span>
+        <span class="ef-name">${esc(f.name)}</span>
+        <span class="ef-size">${fmts(f.file.size)}</span>
+        <span class="ef-tag ${idx===0?'ef-tag-header':'ef-tag-data'}">${idx===0?'HEADER':'DATA'}</span>
+        <button class="ef-rm" onclick="efRemove(${f.id})">✕</button>
+      `;
+      fl.appendChild(div);
+    });
+  }
+
+  window.efRemove = function(id) {
+    efFiles = efFiles.filter(f => f.id !== id);
+    efRenderList();
+  };
+
+  window.efMerge = async function() {
+    if (efFiles.length < 2) return;
+    const outName = ($('ef-outname').value.trim() || 'GABUNGAN_EFAKTUR.csv');
+
+    const pw   = $('ef-pw');
+    const pf   = $('ef-pf');
+    const pl   = $('ef-pl');
+    const pp   = $('ef-pp');
+    const log  = $('ef-log');
+
+    pw.style.display = 'block';
+    log.innerHTML = '';
+    log.classList.add('on');
+    pf.style.width = '0%';
+    $('ef-btn').disabled = true;
+    $('ef-result').classList.remove('on');
+
+    function logLine(html) { log.innerHTML += `<div>${html}</div>`; log.scrollTop = log.scrollHeight; }
+    function setProgress(pct) { pf.style.width = pct + '%'; pp.textContent = Math.round(pct) + '%'; }
+
+    const chunks = [];
+    let totalLines = 0;
+
+    for (let i = 0; i < efFiles.length; i++) {
+      const f = efFiles[i];
+      setProgress((i / efFiles.length) * 88);
+      pl.textContent = `Memproses ${f.name}...`;
+
+      try {
+        const text = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result);
+          r.onerror = () => rej(new Error('Gagal membaca'));
+          r.readAsText(f.file, 'UTF-8');
+        });
+
+        const lines = text.split(/\r?\n/);
+
+        if (i === 0) {
+          chunks.push(text.endsWith('\n') ? text : text + '\n');
+          logLine(`<span class="ef-ok">✓</span> [${String(i+1).padStart(2,'0')}] ${esc(f.name)} — ${lines.length} baris <em style="color:var(--c9)">(header included)</em>`);
+          totalLines += lines.length;
+        } else {
+          const dataLines = lines.slice(3);
+          const dataText  = dataLines.join('\n');
+          chunks.push(dataLines.length && !dataText.endsWith('\n') ? dataText + '\n' : dataText);
+          const skipped = Math.min(3, lines.length);
+          logLine(`<span class="ef-skip">→</span> [${String(i+1).padStart(2,'0')}] ${esc(f.name)} — ${dataLines.length} baris <em>(${skipped} header di-skip)</em>`);
+          totalLines += dataLines.length;
+        }
+      } catch(err) {
+        logLine(`<span class="ef-err">✗</span> ERROR: ${esc(f.name)} — ${err.message}`);
+      }
+
+      await new Promise(r => setTimeout(r, 60));
+    }
+
+    setProgress(100);
+    pl.textContent = 'Selesai!';
+
+    const merged = chunks.join('');
+    const blob   = new Blob([merged], { type: 'text/csv;charset=utf-8;' });
+    const url    = URL.createObjectURL(blob);
+
+    logLine(`<span class="ef-done">★</span> SELESAI — Total ${totalLines.toLocaleString()} baris → ${esc(outName)}`);
+
+    $('ef-stat-files').textContent = efFiles.length;
+    $('ef-stat-rows').textContent  = totalLines.toLocaleString();
+    $('ef-stat-size').textContent  = fmts(blob.size);
+
+    const dlBtn = $('ef-dl');
+    dlBtn.href     = url;
+    dlBtn.download = outName;
+
+    $('ef-result').classList.add('on');
+    $('ef-btn').disabled = false;
+
+    setTimeout(() => { pw.style.display='none'; pf.style.width='0%'; }, 900);
+    toast('✅', `${efFiles.length} file CSV berhasil digabung!`);
+  };
+
+  window.efReset = function() {
+    efFiles = [];
+    efIdCounter = 0;
+    inp.value = '';
+    $('ef-fl').innerHTML = '';
+    $('ef-hint').style.display = 'none';
+    $('ef-btn').disabled = true;
+    $('ef-result').classList.remove('on');
+    $('ef-log').classList.remove('on');
+    $('ef-log').innerHTML = '';
+    $('ef-pw').style.display = 'none';
+    $('ef-outname').value = 'GABUNGAN_EFAKTUR.csv';
+  };
+
 })();
 </script>
 </body>
